@@ -8,6 +8,21 @@ class CommandLineParser(
     }
 
     fun parse(args: List<String>) {
+        try {
+            doParse(args)
+        }
+        catch (e: HelpPrintedException) {
+            return
+        }
+        catch (e: Throwable) {
+            // TODO better error reporting
+            e.message?.let { cli.defaultHelpPrinter?.printText(it) }
+            cli.printHelp()
+            throw e
+        }
+    }
+
+    private fun doParse(args: List<String>) {
         val argsIterator = tokenizeArgs(args).listIterator()
 
         val positionalsIterator = cli.getPositionalArgumentsIterator()
@@ -28,8 +43,7 @@ class CommandLineParser(
                 if (argsIterator.hasNext()) {
                     flagValueAction.invoke(argsIterator.next())
                     continue
-                }
-                else {
+                } else {
                     throw CommandLineException("No argument for flag $arg")
                 }
             }
@@ -41,8 +55,7 @@ class CommandLineParser(
                     currentPositional = positionalsIterator.nextOrNull()
                     currentPositionalCount = 0
                 }
-            }
-            else {
+            } else {
                 throw CommandLineException("Unexpected positional argument: '$arg'")
             }
         }
