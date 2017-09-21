@@ -25,10 +25,8 @@ import kotlinx.cli.*
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-    // Create command-line interface
+    // Define command-line interface 
     val cli = CommandLineInterface("Example1")
-
-    // Define command-line arguments
     val integers by cli.positionalArgumentsList("N+", "Integers", minArgs = 1)
     val radix by cli.flagValueArgument("-r", "radix", "Input numbers radix", 10) { it.toInt() }
     val sum by cli.flagArgument("--sum", "Print sum")
