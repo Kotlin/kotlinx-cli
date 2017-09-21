@@ -44,8 +44,8 @@ class CommandLineParser(
             if (cli.argumentsAfterDoubleDashArePositional && arg == "--") {
                 while (argsIterator.hasNext()) {
                     handlePositionalArgument(argsIterator.next())
-                    return
                 }
+                return
             }
 
             val flagAction = cli.getFlagAction(arg)
