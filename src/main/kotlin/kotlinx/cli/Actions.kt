@@ -1,10 +1,26 @@
 package kotlinx.cli
 
-interface FlagAction {
+interface Action {
+    fun invoke(arguments: ListIterator<String>)
+}
+
+interface FlagAction : Action {
+    override fun invoke(arguments: ListIterator<String>) {
+        invoke()
+    }
+
     fun invoke()
 }
 
-interface ArgumentAction {
+interface ArgumentAction : Action {
+    override fun invoke(arguments: ListIterator<String>) {
+        if (arguments.hasNext())
+            invoke(arguments.next())
+        else
+            throw MissingArgumentException()
+    }
+
     fun invoke(argument: String)
 }
 
+interface CommandAction : Action

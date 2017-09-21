@@ -1,6 +1,6 @@
 package kotlinx.cli
 
-class CommandLineParser(
+class CommandLineParser internal constructor(
         private val cli: CommandLineInterface
 ) {
     fun parse(args: Array<out String>) {
@@ -48,23 +48,18 @@ class CommandLineParser(
                 return
             }
 
-            val flagAction = cli.getFlagAction(arg)
-            if (flagAction != null) {
-                flagAction.invoke()
-                continue
+            val action = cli.getFlagAction(arg)
+            if (action == null) {
+                handlePositionalArgument(arg)
             }
-
-            val flagValueAction = cli.getFlagValueAction(arg)
-            if (flagValueAction != null) {
-                if (argsIterator.hasNext()) {
-                    flagValueAction.invoke(argsIterator.next())
-                    continue
-                } else {
+            else {
+                try {
+                    action.invoke(argsIterator)
+                }
+                catch (e: MissingArgumentException) {
                     throw CommandLineException("No argument for flag $arg")
                 }
             }
-
-            handlePositionalArgument(arg)
         }
 
         currentPositional?.let {

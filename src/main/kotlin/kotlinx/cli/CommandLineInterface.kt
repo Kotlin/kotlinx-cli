@@ -18,8 +18,7 @@ open class CommandLineInterface(
     private val positionalArguments = ArrayList<PositionalArgument>()
     fun getPositionalArgumentsIterator(): ListIterator<PositionalArgument> = positionalArguments.listIterator()
 
-    private val flagActions = HashMap<String, FlagAction>()
-    private val flagValueActions = HashMap<String, ArgumentAction>()
+    private val flagActions = HashMap<String, Action>()
 
     init {
         if (defaultHelpPrinter != null) {
@@ -68,19 +67,17 @@ open class CommandLineInterface(
         positionalArguments.add(positionalArgument)
     }
 
-    fun setFlagAction(flag: String, flagAction: FlagAction) {
-        if (flag in flagActions) error("Flag is already set: $flag")
-        flagActions[flag] = flagAction
+    private fun checkNewFlag(flag: String) {
+        if (flag in flagActions) {
+            error("Flag is already set: $flag")
+        }
     }
 
-    fun setFlagValueAction(flag: String, argumentAction: ArgumentAction) {
-        if (flag in flagValueActions) error("Flag is already set: $flag")
-        flagValueActions[flag] = argumentAction
+    fun setFlagAction(flag: String, action: Action) {
+        checkNewFlag(flag)
+        flagActions[flag] = action
     }
 
-    fun getFlagAction(flag: String): FlagAction? =
+    fun getFlagAction(flag: String): Action? =
             flagActions[flag]
-
-    fun getFlagValueAction(flag: String): ArgumentAction? =
-            flagValueActions[flag]
 }
