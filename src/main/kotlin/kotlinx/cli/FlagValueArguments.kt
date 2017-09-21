@@ -29,7 +29,7 @@ abstract class FlagValueArgumentBase<T>(
 }
 
 
-fun <T : FlagValueActionBase> CommandLineInterface.registerAction(action: T): T {
+fun <T : FlagValueActionBase> CommandLineBuilder.registerAction(action: T): T {
     addUsageEntry("[${action.flags.first()} ${action.valueSyntax}]")
     addHelpEntry(action)
     for (flag in action.flags) {
@@ -39,11 +39,11 @@ fun <T : FlagValueActionBase> CommandLineInterface.registerAction(action: T): T 
 }
 
 
-fun <T> CommandLineInterface.registerArgument(argument: FlagValueArgumentBase<T>): ArgumentValue<T> =
+fun <T> CommandLineBuilder.registerArgument(argument: FlagValueArgumentBase<T>): ArgumentValue<T> =
         argument.also { registerAction(it) }
 
 
-fun CommandLineInterface.flagValueAction(
+fun CommandLineBuilder.flagValueAction(
         flags: List<String>, valueSyntax: String, help: String,
         action: (String) -> Unit
 ) {
@@ -55,14 +55,14 @@ fun CommandLineInterface.flagValueAction(
 }
 
 
-fun CommandLineInterface.flagValueAction(
+fun CommandLineBuilder.flagValueAction(
         flag: String, valueSyntax: String, help: String,
         action: (String) -> Unit
 ) =
         flagValueAction(listOf(flag), valueSyntax, help, action)
 
 
-fun <T> CommandLineInterface.flagValueArgument(
+fun <T> CommandLineBuilder.flagValueArgument(
         flags: List<String>, valueSyntax: String, help: String,
         initialValue: T,
         mapping: (String) -> T
@@ -74,7 +74,7 @@ fun <T> CommandLineInterface.flagValueArgument(
         })
 
 
-fun <T> CommandLineInterface.flagValueArgument(
+fun <T> CommandLineBuilder.flagValueArgument(
         flag: String, valueSyntax: String, help: String,
         initialValue: T,
         mapping: (String) -> T
@@ -82,15 +82,15 @@ fun <T> CommandLineInterface.flagValueArgument(
         flagValueArgument(listOf(flag), valueSyntax, help, initialValue, mapping)
 
 
-fun CommandLineInterface.flagValueArgument(flags: List<String>, valueSyntax: String, help: String) =
+fun CommandLineBuilder.flagValueArgument(flags: List<String>, valueSyntax: String, help: String) =
         flagValueArgument(flags, valueSyntax, help, null, { it })
 
-fun CommandLineInterface.flagValueArgument(flag: String, valueSyntax: String, help: String) =
+fun CommandLineBuilder.flagValueArgument(flag: String, valueSyntax: String, help: String) =
         flagValueArgument(listOf(flag), valueSyntax, help)
 
-fun CommandLineInterface.flagValueArgument(flags: List<String>, valueSyntax: String, help: String, initialValue: String) =
+fun CommandLineBuilder.flagValueArgument(flags: List<String>, valueSyntax: String, help: String, initialValue: String) =
         flagValueArgument(flags, valueSyntax, help, initialValue, { it })
 
-fun CommandLineInterface.flagValueArgument(flag: String, valueSyntax: String, help: String, initialValue: String) =
+fun CommandLineBuilder.flagValueArgument(flag: String, valueSyntax: String, help: String, initialValue: String) =
         flagValueArgument(listOf(flag), valueSyntax, help, initialValue)
 

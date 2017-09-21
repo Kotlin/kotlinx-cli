@@ -31,7 +31,7 @@ abstract class FlagArgumentBase<T>(
 }
 
 
-fun <T : FlagActionBase> CommandLineInterface.registerAction(action: T): T {
+fun <T : FlagActionBase> CommandLineBuilder.registerAction(action: T): T {
     addUsageEntry("[${action.flags.first()}]")
     addHelpEntry(action)
     for (flag in action.flags) {
@@ -41,11 +41,11 @@ fun <T : FlagActionBase> CommandLineInterface.registerAction(action: T): T {
 }
 
 
-fun <T> CommandLineInterface.registerArgument(argument: FlagArgumentBase<T>): ArgumentValue<T> =
+fun <T> CommandLineBuilder.registerArgument(argument: FlagArgumentBase<T>): ArgumentValue<T> =
         registerAction(argument)
 
 
-fun CommandLineInterface.flagAction(flags: List<String>, help: String, action: () -> Unit) {
+fun CommandLineBuilder.flagAction(flags: List<String>, help: String, action: () -> Unit) {
     registerAction(object : FlagActionBase(flags, help) {
         override fun invoke() {
             action()
@@ -54,16 +54,16 @@ fun CommandLineInterface.flagAction(flags: List<String>, help: String, action: (
 }
 
 
-fun CommandLineInterface.flagAction(flag: String, help: String, action: () -> Unit) {
+fun CommandLineBuilder.flagAction(flag: String, help: String, action: () -> Unit) {
     flagAction(listOf(flag), help, action)
 }
 
 
-fun CommandLineInterface.flagArgument(flag: String, help: String) =
+fun CommandLineBuilder.flagArgument(flag: String, help: String) =
         flagArgument(flag, help, false, true)
 
 
-fun <T> CommandLineInterface.flagArgument(flags: List<String>, help: String, initialValue: T, flagValue: T) =
+fun <T> CommandLineBuilder.flagArgument(flags: List<String>, help: String, initialValue: T, flagValue: T) =
         registerArgument(object : FlagArgumentBase<T>(flags, help, initialValue) {
             override fun invoke() {
                 value = flagValue
@@ -72,11 +72,11 @@ fun <T> CommandLineInterface.flagArgument(flags: List<String>, help: String, ini
 
 
 
-fun <T> CommandLineInterface.flagArgument(flag: String, help: String, initialValue: T, flagValue: T) =
+fun <T> CommandLineBuilder.flagArgument(flag: String, help: String, initialValue: T, flagValue: T) =
         flagArgument(listOf(flag), help, initialValue, flagValue)
 
 
-fun <T> CommandLineInterface.foldFlagArguments(flags: List<String>, help: String, initialValue: T, fn: (T) -> T) =
+fun <T> CommandLineBuilder.foldFlagArguments(flags: List<String>, help: String, initialValue: T, fn: (T) -> T) =
         registerArgument(object : FlagArgumentBase<T>(flags, help, initialValue) {
             override fun invoke() {
                 value = fn(value)
@@ -84,7 +84,7 @@ fun <T> CommandLineInterface.foldFlagArguments(flags: List<String>, help: String
         })
 
 
-fun <T> CommandLineInterface.foldFlagArguments(flag: String, help: String, initialValue: T, fn: (T) -> T) =
+fun <T> CommandLineBuilder.foldFlagArguments(flag: String, help: String, initialValue: T, fn: (T) -> T) =
         foldFlagArguments(listOf(flag), help, initialValue, fn)
 
 

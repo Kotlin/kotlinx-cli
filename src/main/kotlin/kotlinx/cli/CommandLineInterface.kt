@@ -8,7 +8,7 @@ open class CommandLineInterface(
         val defaultHelpPrinter: HelpPrinter? = SimpleHelpPrinter(24),
         val printHelpByDefault: Boolean = true,
         val argumentsAfterDoubleDashArePositional: Boolean = true
-) {
+) : CommandLineBuilder {
     private val usageBuilder: StringBuilder? =
             if (usage == null) StringBuilder("Usage: $commandName ") else null
     private val actualUsage get() = usageBuilder?.toString() ?: usage!!
@@ -53,17 +53,17 @@ open class CommandLineInterface(
         }
     }
 
-    fun addUsageEntry(entry: String) {
+    override fun addUsageEntry(entry: String) {
         usageBuilder?.run {
             append(entry).append(" ")
         }
     }
 
-    fun addHelpEntry(helpEntry: HelpEntry) {
+    override fun addHelpEntry(helpEntry: HelpEntry) {
         helpEntries.add(helpEntry)
     }
 
-    fun addPositionalArgument(positionalArgument: PositionalArgument) {
+    override fun addPositionalArgument(positionalArgument: PositionalArgument) {
         positionalArguments.add(positionalArgument)
     }
 
@@ -73,7 +73,7 @@ open class CommandLineInterface(
         }
     }
 
-    fun setFlagAction(flag: String, action: Action) {
+    override fun setFlagAction(flag: String, action: Action) {
         checkNewFlag(flag)
         flagActions[flag] = action
     }

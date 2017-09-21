@@ -52,7 +52,7 @@ abstract class ListPositionalArgumentBase<T>(
 }
 
 
-fun <T : PositionalActionBase> CommandLineInterface.registerAction(action: T): T =
+fun <T : PositionalActionBase> CommandLineBuilder.registerAction(action: T): T =
         action.also {
             addUsageEntry(it.name)
             addHelpEntry(it)
@@ -60,11 +60,11 @@ fun <T : PositionalActionBase> CommandLineInterface.registerAction(action: T): T
         }
 
 
-fun <T> CommandLineInterface.registerArgument(positionalArgument: PositionalArgumentBase<T>): ArgumentValue<T> =
+fun <T> CommandLineBuilder.registerArgument(positionalArgument: PositionalArgumentBase<T>): ArgumentValue<T> =
         registerAction(positionalArgument)
 
 
-fun CommandLineInterface.positionalAction(name: String, help: String, minArgs: Int = 0, maxArgs: Int = 1, action: (String) -> Unit) {
+fun CommandLineBuilder.positionalAction(name: String, help: String, minArgs: Int = 0, maxArgs: Int = 1, action: (String) -> Unit) {
     registerAction(object : PositionalActionBase(name, help, minArgs, maxArgs) {
         override fun invoke(argument: String) {
             action(argument)
@@ -73,15 +73,15 @@ fun CommandLineInterface.positionalAction(name: String, help: String, minArgs: I
 }
 
 
-fun CommandLineInterface.positionalArgument(name: String, help: String, minArgs: Int = 0) =
+fun CommandLineBuilder.positionalArgument(name: String, help: String, minArgs: Int = 0) =
         positionalArgument(name, help, minArgs, { it })
 
 
-fun CommandLineInterface.positionalArgument(name: String, help: String, initialValue: String, minArgs: Int = 0) =
+fun CommandLineBuilder.positionalArgument(name: String, help: String, initialValue: String, minArgs: Int = 0) =
         positionalArgument(name, help, initialValue, minArgs, { it })
 
 
-fun <T : Any> CommandLineInterface.positionalArgument(name: String, help: String, minArgs: Int = 0, mapping: (String) -> T) =
+fun <T : Any> CommandLineBuilder.positionalArgument(name: String, help: String, minArgs: Int = 0, mapping: (String) -> T) =
         registerArgument(object : SinglePositionalArgumentBase<T?>(name, help, null, minArgs) {
             override fun invoke(argument: String) {
                 value = mapping(argument)
@@ -89,7 +89,7 @@ fun <T : Any> CommandLineInterface.positionalArgument(name: String, help: String
         })
 
 
-fun <T : Any> CommandLineInterface.positionalArgument(name: String, help: String, initialValue: T, minArgs: Int = 0, mapping: (String) -> T) =
+fun <T : Any> CommandLineBuilder.positionalArgument(name: String, help: String, initialValue: T, minArgs: Int = 0, mapping: (String) -> T) =
         registerArgument(object : SinglePositionalArgumentBase<T>(name, help, initialValue, minArgs) {
             override fun invoke(argument: String) {
                 value = mapping(argument)
@@ -97,7 +97,7 @@ fun <T : Any> CommandLineInterface.positionalArgument(name: String, help: String
         })
 
 
-fun CommandLineInterface.positionalArgumentsList(
+fun CommandLineBuilder.positionalArgumentsList(
         name: String, help: String,
         destination: MutableList<String> = ArrayList(),
         minArgs: Int = 0, maxArgs: Int = Int.MAX_VALUE
@@ -105,7 +105,7 @@ fun CommandLineInterface.positionalArgumentsList(
         positionalArgumentsList(name, help, destination, minArgs, maxArgs, { it })
 
 
-fun <T> CommandLineInterface.positionalArgumentsList(
+fun <T> CommandLineBuilder.positionalArgumentsList(
         name: String, help: String,
         destination: MutableList<T> = ArrayList(),
         minArgs: Int = 0, maxArgs: Int = Int.MAX_VALUE,
@@ -118,7 +118,7 @@ fun <T> CommandLineInterface.positionalArgumentsList(
         })
 
 
-fun <T> CommandLineInterface.foldPositionalArguments(
+fun <T> CommandLineBuilder.foldPositionalArguments(
         name: String, help: String,
         initialValue: T,
         minArgs: Int = 0, maxArgs: Int = Int.MAX_VALUE,
