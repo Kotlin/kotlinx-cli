@@ -32,7 +32,7 @@ abstract class FlagArgumentBase<T>(
 
 
 fun <T : FlagActionBase> CommandLineInterface.registerAction(action: T): T {
-    addUsageEntry(action.flags.first())
+    addUsageEntry("[${action.flags.first()}]")
     addHelpEntry(action)
     for (flag in action.flags) {
         setFlagAction(flag, action)

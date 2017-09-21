@@ -55,7 +55,7 @@ fun main(args: Array<String>) {
 
 Running this program without arguments produces the following output:
 ```
-Usage: Example1 -h N+ -r radix --sum --max --min 
+Usage: Example1 [-h] N+ [-r radix] [--sum] [--max] [--min] 
 
 -h, --help                Prints help
 N+                        Integers
