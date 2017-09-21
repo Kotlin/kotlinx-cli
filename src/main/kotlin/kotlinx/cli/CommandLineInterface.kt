@@ -5,6 +5,7 @@ open class CommandLineInterface(
         private val usage: String? = null,
         private val description: String? = null,
         private val epilogue: String? = null,
+        addHelp: Boolean = true,
         val defaultHelpPrinter: HelpPrinter? = SimpleHelpPrinter(24),
         val printHelpByDefault: Boolean = true,
         val argumentsAfterDoubleDashArePositional: Boolean = true
@@ -21,7 +22,7 @@ open class CommandLineInterface(
     private val flagActions = HashMap<String, Action>()
 
     init {
-        if (defaultHelpPrinter != null) {
+        if (addHelp && defaultHelpPrinter != null) {
             help(listOf("-h", "--help"), "Prints help", defaultHelpPrinter, true)
         }
     }

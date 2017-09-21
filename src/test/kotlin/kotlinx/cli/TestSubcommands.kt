@@ -4,9 +4,11 @@ import org.junit.Test
 
 class TestSubcommands {
     @Test fun testSubcommands() {
-        val cli = CommandLineInterface("testNestedCommands")
+        val cli = CommandLineInterface("testNestedCommands", addHelp = false)
 
-        val commonFlag by cli.flagArgument("--common", "common flag for foo and bar")
+        val commons = cli.helpEntriesGroup("Common arguments:")
+        commons.help()
+        val commonFlag by commons.flagArgument("--common", "common flag for foo and bar")
 
         val fooCmd = CommandLineInterface("foo")
         val fooX by fooCmd.positionalArgument("X", "X argument for foo")
@@ -16,7 +18,6 @@ class TestSubcommands {
         val barX by barCmd.positionalArgument("X", "X argument for bar")
         val barFlag by barCmd.flagArgument("--flag", "flag argument for bar")
 
-        cli.helpSeparator()
         cli.subcommands("COMMAND", "Available subcommands:",
                 Subcommand(fooCmd, "foo subcommand", { foo(commonFlag, fooX, fooY) }),
                 Subcommand(barCmd, "bar subcommand", { bar(commonFlag, barX, barFlag) })
