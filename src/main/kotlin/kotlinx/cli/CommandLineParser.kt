@@ -1,7 +1,7 @@
 package kotlinx.cli
 
 class CommandLineParser(
-    private val cli: CommandLineInterface
+        private val cli: CommandLineInterface
 ) {
     fun parse(args: Array<out String>) {
         parse(args.asList())
@@ -27,15 +27,26 @@ class CommandLineParser(
         }
     }
 
+    private lateinit var positionalsIterator: ListIterator<PositionalArgument>
+    private var currentPositional: PositionalArgument? = null
+    private var currentPositionalCount = 0
+
     private fun doParse(args: List<String>) {
         val argsIterator = tokenizeArgs(args).listIterator()
 
-        val positionalsIterator = cli.getPositionalArgumentsIterator()
-        var currentPositional = positionalsIterator.nextOrNull()
-        var currentPositionalCount = 0
+        positionalsIterator = cli.getPositionalArgumentsIterator()
+        currentPositional = positionalsIterator.nextOrNull()
+        currentPositionalCount = 0
 
         while (argsIterator.hasNext()) {
             val arg = argsIterator.next()
+
+            if (cli.argumentsAfterDoubleDashArePositional && arg == "--") {
+                while (argsIterator.hasNext()) {
+                    handlePositionalArgument(argsIterator.next())
+                    return
+                }
+            }
 
             val flagAction = cli.getFlagAction(arg)
             if (flagAction != null) {
@@ -53,23 +64,29 @@ class CommandLineParser(
                 }
             }
 
-            if (currentPositional != null) {
-                currentPositional.action.invoke(arg)
+            handlePositionalArgument(arg)
+        }
+
+        currentPositional?.let {
+            checkEnoughPositionals(it, currentPositionalCount)
+        }
+        while (positionalsIterator.hasNext()) {
+            checkEnoughPositionals(positionalsIterator.next(), 0)
+        }
+    }
+
+    private fun handlePositionalArgument(arg: String) {
+        currentPositional.let { cp ->
+            if (cp != null) {
+                cp.action.invoke(arg)
                 currentPositionalCount++
-                if (currentPositionalCount >= currentPositional.maxArgs) {
+                if (currentPositionalCount >= cp.maxArgs) {
                     currentPositional = positionalsIterator.nextOrNull()
                     currentPositionalCount = 0
                 }
             } else {
                 throw CommandLineException("Unexpected positional argument: '$arg'")
             }
-        }
-
-        if (currentPositional != null) {
-            checkEnoughPositionals(currentPositional, currentPositionalCount)
-        }
-        while (positionalsIterator.hasNext()) {
-            checkEnoughPositionals(positionalsIterator.next(), 0)
         }
     }
 
