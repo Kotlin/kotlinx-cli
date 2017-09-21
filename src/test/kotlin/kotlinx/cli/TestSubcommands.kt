@@ -2,8 +2,8 @@ package kotlinx.cli
 
 import org.junit.Test
 
-class TestNestedCommands {
-    @Test fun testNestedCommands() {
+class TestSubcommands {
+    @Test fun testSubcommands() {
         val cli = CommandLineInterface("testNestedCommands")
 
         val commonFlag by cli.flagArgument("--common", "common flag for foo and bar")
@@ -11,12 +11,16 @@ class TestNestedCommands {
         val fooCmd = CommandLineInterface("foo")
         val fooX by fooCmd.positionalArgument("X", "X argument for foo")
         val fooY by fooCmd.positionalArgument("Y", "Y argument for foo")
-        cli.command(fooCmd, "foo subcommand", { foo(commonFlag, fooX, fooY) })
 
         val barCmd = CommandLineInterface("bar")
         val barX by barCmd.positionalArgument("X", "X argument for bar")
         val barFlag by barCmd.flagArgument("--flag", "flag argument for bar")
-        cli.command(barCmd, "bar subcommand", { bar(commonFlag, barX, barFlag) })
+
+        cli.helpSeparator()
+        cli.subcommands("COMMAND", "Available subcommands:",
+                Subcommand(fooCmd, "foo subcommand", { foo(commonFlag, fooX, fooY) }),
+                Subcommand(barCmd, "bar subcommand", { bar(commonFlag, barX, barFlag) })
+        )
 
         cli.printHelp()
 

@@ -35,11 +35,20 @@ class SimpleHelpPrinter(private val syntaxWidth: Int) : HelpPrinter {
 
     override fun printEntry(helpEntry: String, description: String) {
         if (helpEntry.length <= syntaxWidth) {
-            println("${helpEntry.padEnd(syntaxWidth)}  $description")
+            println("  ${helpEntry.padEnd(syntaxWidth)}  $description")
         }
         else {
-            println(helpEntry)
-            println("${"".padEnd(syntaxWidth)}  $description")
+            println("  $helpEntry")
+            println("  ${"".padEnd(syntaxWidth)}  $description")
         }
     }
+}
+
+
+fun CommandLineInterface.helpSeparator() {
+    addHelpEntry(object : HelpEntry {
+        override fun printHelp(helpPrinter: HelpPrinter) {
+            helpPrinter.printSeparator()
+        }
+    })
 }
