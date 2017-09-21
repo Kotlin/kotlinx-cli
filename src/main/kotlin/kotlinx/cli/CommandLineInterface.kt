@@ -1,7 +1,7 @@
 package kotlinx.cli
 
 open class CommandLineInterface(
-        program: String,
+        val commandName: String,
         private val usage: String? = null,
         private val description: String? = null,
         private val epilogue: String? = null,
@@ -10,7 +10,7 @@ open class CommandLineInterface(
         val argumentsAfterDoubleDashArePositional: Boolean = true
 ) {
     private val usageBuilder: StringBuilder? =
-            if (usage == null) StringBuilder("Usage: $program ") else null
+            if (usage == null) StringBuilder("Usage: $commandName ") else null
     private val actualUsage get() = usageBuilder?.toString() ?: usage!!
 
     private val helpEntries = ArrayList<HelpEntry>()

@@ -4,7 +4,7 @@ import kotlinx.cli.*
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-    // Define command-line interface
+    // Define commandName-line interface
     val cli = CommandLineInterface("Example1")
     val integers by cli.positionalArgumentsList("N+", "Integers", minArgs = 1)
     val radix by cli.flagValueArgument("-r", "radix", "Input numbers radix", 10) { it.toInt() }

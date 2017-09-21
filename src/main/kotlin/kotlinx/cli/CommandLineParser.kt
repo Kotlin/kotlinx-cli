@@ -8,13 +8,17 @@ class CommandLineParser internal constructor(
     }
 
     fun parse(args: List<String>) {
-        if (args.isEmpty() && cli.printHelpByDefault) {
+        parseTokenized(tokenizeArgs(args).listIterator())
+    }
+
+    fun parseTokenized(argsIterator: ListIterator<String>) {
+        if (!argsIterator.hasNext() && cli.printHelpByDefault) {
             cli.printHelp()
             throw HelpPrintedException()
         }
 
         try {
-            doParse(args)
+            doParse(argsIterator)
         }
         catch (e: HelpPrintedException) {
             throw e
@@ -31,9 +35,7 @@ class CommandLineParser internal constructor(
     private var currentPositional: PositionalArgument? = null
     private var currentPositionalCount = 0
 
-    private fun doParse(args: List<String>) {
-        val argsIterator = tokenizeArgs(args).listIterator()
-
+    private fun doParse(argsIterator: ListIterator<String>) {
         positionalsIterator = cli.getPositionalArgumentsIterator()
         currentPositional = positionalsIterator.nextOrNull()
         currentPositionalCount = 0
