@@ -5,7 +5,8 @@ open class CommandLineInterface(
         private val usage: String? = null,
         private val description: String? = null,
         private val epilogue: String? = null,
-        val defaultHelpPrinter: HelpPrinter? = SimpleHelpPrinter(24)
+        val defaultHelpPrinter: HelpPrinter? = SimpleHelpPrinter(24),
+        val printHelpByDefault: Boolean = true
 ) {
     private val usageBuilder: StringBuilder? =
             if (usage == null) StringBuilder("Usage: $program ") else null

@@ -29,7 +29,7 @@ fun main(args: Array<String>) {
     val cli = CommandLineInterface("Example1")
 
     // Define command-line arguments
-    val integers by cli.positionalArgumentsList("N", "Integers", minArgs = 1)
+    val integers by cli.positionalArgumentsList("N+", "Integers", minArgs = 1)
     val radix by cli.flagValueArgument("-r", "radix", "Input numbers radix", 10) { it.toInt() }
     val sum by cli.flagArgument("--sum", "Print sum")
     val max by cli.flagArgument("--max", "Print max")
@@ -55,11 +55,10 @@ fun main(args: Array<String>) {
 
 Running this program without arguments produces the following output:
 ```
-Not enough positional arguments for N: 0, expected at least 1
-Usage: Example1 -h N -r radix --sum --max --min 
+Usage: Example1 -h N+ -r radix --sum --max --min 
 
 -h, --help                Prints help
-N                         Integers
+N+                        Integers
 -r radix                  Input numbers radix
 --sum                     Print sum
 --max                     Print max

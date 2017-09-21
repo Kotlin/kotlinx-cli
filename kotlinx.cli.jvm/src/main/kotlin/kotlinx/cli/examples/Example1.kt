@@ -8,7 +8,7 @@ fun main(args: Array<String>) {
     val cli = CommandLineInterface("Example1")
 
     // Define command-line arguments
-    val integers by cli.positionalArgumentsList("N", "Integers", minArgs = 1)
+    val integers by cli.positionalArgumentsList("N+", "Integers", minArgs = 1)
     val radix by cli.flagValueArgument("-r", "radix", "Input numbers radix", 10) { it.toInt() }
     val sum by cli.flagArgument("--sum", "Print sum")
     val max by cli.flagArgument("--max", "Print max")

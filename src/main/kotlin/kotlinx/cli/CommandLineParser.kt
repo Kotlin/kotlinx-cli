@@ -8,11 +8,16 @@ class CommandLineParser(
     }
 
     fun parse(args: List<String>) {
+        if (args.isEmpty() && cli.printHelpByDefault) {
+            cli.printHelp()
+            throw HelpPrintedException()
+        }
+
         try {
             doParse(args)
         }
         catch (e: HelpPrintedException) {
-            return
+            throw e
         }
         catch (e: Throwable) {
             // TODO better error reporting
