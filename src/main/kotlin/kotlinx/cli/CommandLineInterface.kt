@@ -8,7 +8,10 @@ open class CommandLineInterface(
         addHelp: Boolean = true,
         val defaultHelpPrinter: HelpPrinter? = SimpleHelpPrinter(24),
         val printHelpByDefault: Boolean = true,
-        val argumentsAfterDoubleDashArePositional: Boolean = true
+        val argumentsAfterDoubleDashArePositional: Boolean = true,
+        val shortTagPrefix: String? = null,
+        val longTagPrefixes: List<String> = emptyList(),
+        val longTagValueDelimiter: String? = null
 ) : CommandLineBuilder {
     private val usageBuilder: StringBuilder? =
             if (usage == null) StringBuilder("Usage: $commandName ") else null

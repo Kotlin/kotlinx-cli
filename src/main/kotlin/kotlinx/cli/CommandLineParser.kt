@@ -19,11 +19,9 @@ class CommandLineParser internal constructor(
 
         try {
             doParse(argsIterator)
-        }
-        catch (e: HelpPrintedException) {
+        } catch (e: HelpPrintedException) {
             throw e
-        }
-        catch (e: Throwable) {
+        } catch (e: Throwable) {
             // TODO better error reporting
             e.message?.let { cli.defaultHelpPrinter?.printText(it) }
             cli.printHelp()
@@ -53,12 +51,10 @@ class CommandLineParser internal constructor(
             val action = cli.getFlagAction(arg)
             if (action == null) {
                 handlePositionalArgument(arg)
-            }
-            else {
+            } else {
                 try {
                     action.invoke(argsIterator)
-                }
-                catch (e: MissingArgumentException) {
+                } catch (e: MissingArgumentException) {
                     throw CommandLineException("No argument for flag $arg")
                 }
             }
@@ -96,8 +92,51 @@ class CommandLineParser internal constructor(
         }
     }
 
-    private fun tokenizeArgs(args: List<String>): List<String> {
-        // TODO tokenize args according to parser options
-        return args
+    private fun tokenizeArgs(args: List<String>): List<String> =
+            args.flatMap { tokenizeArg(it) }
+
+    private fun tokenizeArg(arg: String): List<String> {
+        if (cli.getFlagAction(arg) != null) return listOf(arg)
+
+        if (cli.longTagValueDelimiter != null && cli.longTagPrefixes.any { arg.startsWith(it) }) {
+            val k = arg.indexOf(cli.longTagValueDelimiter)
+            if (k >= 0) {
+                val longTag = arg.substring(0, k)
+                val longValue = arg.substring(k + 1)
+                return listOf(longTag, longValue)
+            }
+        }
+
+        if (isShortTagPrefixed(arg)) {
+            return tokenizeShortTags(arg)
+        }
+
+        return listOf(arg)
     }
+
+    private fun tokenizeShortTags(arg: String): List<String> {
+        val result = ArrayList<String>()
+        for (i in 1 until arg.length) {
+            val fullTag = "${cli.shortTagPrefix}${arg[i]}"
+            val action = cli.getFlagAction(fullTag) ?: return listOf(arg)
+            when (action) {
+                is FlagAction -> result.add(fullTag)
+
+                is ArgumentAction -> {
+                    result.add(fullTag)
+                    if (i < arg.lastIndex) {
+                        result.add(arg.substring(i + 1))
+                    }
+                    return result
+                }
+
+                else -> error("Unexpected short tag action: $fullTag => $action")
+            }
+        }
+        return result
+    }
+
+    private fun isShortTagPrefixed(arg: String) =
+            cli.shortTagPrefix != null && arg.startsWith(cli.shortTagPrefix) &&
+            cli.longTagPrefixes.none { arg.startsWith(it) }
 }
