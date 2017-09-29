@@ -3,7 +3,6 @@
   <component name="FacetManager">
     <facet type="kotlin-language" name="Kotlin">
       <configuration version="3" platform="JVM 1.6" useProjectSettings="false">
-        <implements>kotlinx.cli_main</implements>
         <compilerSettings>
           <option name="additionalArguments" value="-Xmulti-platform" />
         </compilerSettings>
