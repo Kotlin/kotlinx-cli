@@ -37,9 +37,10 @@ class TestAntExample {
 
         cli.onFlag("-version", "print the version information and exit").once { printVersion() }
 
-        var verbosity = Verbosity.NORMAL
-        cli.onFlag("-quiet", "be extra quiet").onEach { verbosity = Verbosity.QUIET }
-        cli.onFlag("-verbose", "be extra verbose").onEach { verbosity = Verbosity.VERBOSE }
+        val verbosity by sharedOption(Verbosity.NORMAL) {
+            cli.onFlag("-quiet", "be extra quiet").storeShared(Verbosity.QUIET)
+            cli.onFlag("-verbose", "be extra verbose").storeShared(Verbosity.VERBOSE)
+        }
 
         val printDebugInfo by cli.onFlag("-debug", "print debugging information").storeTrue()
 
