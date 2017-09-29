@@ -19,7 +19,7 @@ class CommandLineParser internal constructor(
 
         try {
             doParse(argsIterator)
-        } catch (e: HelpPrintedException) {
+        } catch (e: StopParsingException) {
             throw e
         } catch (e: Throwable) {
             // TODO better error reporting

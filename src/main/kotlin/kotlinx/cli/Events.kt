@@ -77,9 +77,16 @@ fun <T, R> Event<T>.map(transformation: (T) -> R): Event<R> =
             this@map.addListener(it)
         }
 
-fun <T> Event<T>.onEach(action: (T) -> Unit): Event<T> =
+fun <T> Event<T>.onEach(action: (T) -> Unit) =
         apply { add(action) }
 
+fun <T> Event<T>.once(action: (T) -> Unit) =
+        apply {
+            add {
+                action(it)
+                stopParsing()
+            }
+        }
 
 class ArgumentStorage<T>(private var value: T): ArgumentValue<T> {
     override fun getValue(thisRef: Any?, prop: Any?): T =
