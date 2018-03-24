@@ -1,23 +1,37 @@
 buildscript {
-    ext.kotlin_version = '1.2-Beta-eap-14'
-
     repositories {
-        mavenCentral()
-        maven { url 'https://dl.bintray.com/kotlin/kotlin-dev' }
+        jcenter()
+        maven { url "http://kotlin.bintray.com/kotlinx" }
+        maven { url "http://kotlin.bintray.com/kotlin-dev" }
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url "https://dl.bintray.com/jetbrains/kotlin-native-dependencies" }
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.moowork.gradle:gradle-node-plugin:$gradle_node_version"
+        classpath "com.jfrog.bintray.gradle:gradle-bintray-plugin:$bintray_version"
+        classpath "org.jetbrains.kotlin:kotlin-native-gradle-plugin:$kotlin_native_version"
     }
 }
 
-apply plugin: 'kotlin-platform-common'
+allprojects {
+    group = 'org.jetbrains.kotlinx'
 
-repositories {
-    mavenCentral()
-    maven { url "http://dl.bintray.com/kotlin/kotlin-dev" }
+    repositories {
+        jcenter()
+        maven { url "http://kotlin.bintray.com/kotlinx" }
+        maven { url "http://kotlin.bintray.com/kotlin-dev" }
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+
+    tasks.withType(Test) {
+        testLogging {
+            showStandardStreams = true
+            events "passed", "failed"
+        }
+    }
 }
 
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
-    testCompile "org.jetbrains.kotlin:kotlin-test-common:$kotlin_version"
+def platformProject(String name){
+    return project(":kotlinx-cli-$name")
 }

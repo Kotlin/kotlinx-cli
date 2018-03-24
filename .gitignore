@@ -1,0 +1,5 @@
+.gradle
+.idea
+build
+node_modules
+*.iml

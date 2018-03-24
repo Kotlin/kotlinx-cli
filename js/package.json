@@ -1,0 +1,12 @@
+{
+  "name": "KotlinX-cli-js",
+  "description": "KotlinX-cli-js",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/Kotlin/kotlinx.cli",
+  "devDependencies": {
+    "mocha": "^4.1.0"
+  },
+  "dependencies": {
+    "source-map-support": "^0.5.4"
+  }
+}

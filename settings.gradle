@@ -1,3 +1,10 @@
 rootProject.name = 'kotlinx.cli'
 
-include 'kotlinx.cli.jvm'
+include 'common'
+include 'jvm'
+include 'js'
+include 'native'
+
+rootProject.children.each { project ->
+    project.name = "kotlinx-cli-${project.name}"
+}
