@@ -33,37 +33,36 @@ allprojects {
         from sourceSets.main.allSource
         classifier = 'sources'
     }
+}
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                groupId = "org.jetbrains.kotlinx"
-                artifactId = project == rootProject ? "cli" : 'cli-jvm'
-                from components.java
-                artifact sourcesJar
-                pom {
-                    name = 'kotlinx.cli'
-                    description = 'Pure Kotlin implementation of a generic command-line parser'
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            groupId = "org.jetbrains.kotlinx"
+            artifactId = "cli" 
+            from components.java
+            artifact sourcesJar
+            pom {
+                name = 'kotlinx.cli'
+                description = 'Pure Kotlin implementation of a generic command-line parser'
+                url = 'https://github.com/Kotlin/kotlinx.cli'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/Kotlin/kotlinx.cli'
+                    developerConnection = 'scm:git:ssh://git@github.com/Kotlin/kotlinx.cli'
                     url = 'https://github.com/Kotlin/kotlinx.cli'
-                    licenses {
-                        license {
-                            name = 'The Apache License, Version 2.0'
-                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                        }
-                    }
-                    scm {
-                        connection = 'scm:git:https://github.com/Kotlin/kotlinx.cli'
-                        developerConnection = 'scm:git:ssh://git@github.com/Kotlin/kotlinx.cli'
-                        url = 'https://github.com/Kotlin/kotlinx.cli'
-                    }
                 }
             }
         }
-        repositories {
-            maven {
-                url = "$buildDir/maven-repo"
-            }
+    }
+    repositories {
+        maven {
+            url = "$buildDir/maven-repo"
         }
     }
 }
-
