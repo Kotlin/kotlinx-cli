@@ -69,3 +69,46 @@ Args: [-r, 16, CAFE, BABE, DEAD, BEEF, --sum]
 Integers: [51966, 47806, 57005, 48879]
 Sum: 205656
 ```
+
+## Type-Safe Builders (DSL) syntax
+
+kotlinx.cli also provides type-safe builders to make defining commands easy.
+Useful if you have multiple commands you want to implement.
+
+```kotlin
+package kotlinx.cli.examples
+
+import kotlinx.cli.*
+import kotlin.system.exitProcess
+
+fun main(args: Array<String>) {
+
+    val cli = command {
+        commandName = "Example2"
+
+        // Define commandName-line interface
+        val integers by positionalArgumentsList("N+", "Integers", minArgs = 1)
+        val radix by flagValueArgument("-r", "radix", "Input numbers radix", 10) { it.toInt() }
+        val sum by flagArgument("--sum", "Print sum")
+        val max by flagArgument("--max", "Print max")
+        val min by flagArgument("--min", "Print min")
+
+        // main block is where you do something useful
+        main {
+            if (!sum || !max || !min) {
+                // CommandLineContext::exitProcess() looks like standard kotlin
+                exitProcess(1)
+            }
+
+            val ints = integers.map { it.toInt(radix) }
+            println("Args: ${args.asList()}")
+            println("Integers: $ints")
+            if (sum) println("Sum: ${ints.sum()}")
+            if (max) println("Max: ${ints.max()}")
+            if (min) println("Min: ${ints.min()}")
+        }
+    }
+
+    val exitCode = cli.run(args)
+    exitProcess(exitCode)
+}

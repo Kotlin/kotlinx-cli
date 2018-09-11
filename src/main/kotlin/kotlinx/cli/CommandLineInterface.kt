@@ -1,7 +1,7 @@
 package kotlinx.cli
 
 open class CommandLineInterface(
-        val commandName: String,
+        var commandName: String,
         private val usage: String? = null,
         private val description: String? = null,
         private val epilogue: String? = null,
