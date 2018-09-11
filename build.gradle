@@ -10,15 +10,60 @@ buildscript {
     }
 }
 
-apply plugin: 'kotlin'
 
-repositories {
-    mavenCentral()
-    maven { url "http://dl.bintray.com/kotlin/kotlin-dev" }
+
+allprojects {
+    apply plugin: 'kotlin'
+    apply plugin: 'maven-publish'
+
+    version = "0.1"
+
+    repositories {
+        mavenCentral()
+        maven { url "http://dl.bintray.com/kotlin/kotlin-dev" }
+    }
+
+    dependencies {
+        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+        testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+        testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    }
+
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                groupId = "org.jetbrains.kotlinx"
+                artifactId = project == rootProject ? "cli" : 'cli-jvm'
+                from components.java
+                artifact sourcesJar
+                pom {
+                    name = 'kotlinx.cli'
+                    description = 'Pure Kotlin implementation of a generic command-line parser'
+                    url = 'https://github.com/Kotlin/kotlinx.cli'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:https://github.com/Kotlin/kotlinx.cli'
+                        developerConnection = 'scm:git:ssh://git@github.com/Kotlin/kotlinx.cli'
+                        url = 'https://github.com/Kotlin/kotlinx.cli'
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                url = "$buildDir/maven-repo"
+            }
+        }
+    }
 }
 
-dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
-}
