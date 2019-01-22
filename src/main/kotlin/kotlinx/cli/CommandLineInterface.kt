@@ -1,20 +1,20 @@
 package kotlinx.cli
 
 open class CommandLineInterface(
-        val commandName: String,
-        private val usage: String? = null,
-        private val description: String? = null,
-        private val epilogue: String? = null,
-        addHelp: Boolean = true,
-        val defaultHelpPrinter: HelpPrinter? = SimpleHelpPrinter(24),
-        val printHelpByDefault: Boolean = true,
-        val argumentsAfterDoubleDashArePositional: Boolean = true,
-        val shortTagPrefix: String? = null,
-        val longTagPrefixes: List<String> = emptyList(),
-        val longTagValueDelimiter: String? = null
+    val commandName: String,
+    private val usage: String? = null,
+    private val description: String? = null,
+    private val epilogue: String? = null,
+    addHelp: Boolean = true,
+    val defaultHelpPrinter: HelpPrinter? = SimpleHelpPrinter(24),
+    val printHelpByDefault: Boolean = true,
+    val argumentsAfterDoubleDashArePositional: Boolean = true,
+    val shortTagPrefix: String? = null,
+    val longTagPrefixes: List<String> = emptyList(),
+    val longTagValueDelimiter: String? = null
 ) : CommandLineBuilder {
     private val usageBuilder: StringBuilder? =
-            if (usage == null) StringBuilder("Usage: $commandName ") else null
+        if (usage == null) StringBuilder("Usage: $commandName ") else null
     private val actualUsage get() = usageBuilder?.toString() ?: usage!!
 
     private val helpEntries = ArrayList<HelpEntry>()
@@ -83,5 +83,5 @@ open class CommandLineInterface(
     }
 
     fun getFlagAction(flag: String): Action? =
-            flagActions[flag]
+        flagActions[flag]
 }

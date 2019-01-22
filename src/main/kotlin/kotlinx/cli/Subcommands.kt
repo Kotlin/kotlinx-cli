@@ -2,9 +2,9 @@ package kotlinx.cli
 
 
 class Subcommand(
-        val cli: CommandLineInterface,
-        val help: String,
-        val action: () -> Unit
+    val cli: CommandLineInterface,
+    val help: String,
+    val action: () -> Unit
 ) {
     val name = cli.commandName
 }
@@ -35,4 +35,4 @@ fun CommandLineInterface.subcommands(usage: String, helpCaption: String, vararg 
 
 
 fun subcommand(cli: CommandLineInterface, help: String, action: () -> Unit) =
-        Subcommand(cli, help, action)
+    Subcommand(cli, help, action)
