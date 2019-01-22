@@ -1,6 +1,6 @@
 package kotlinx.cli
 
-import org.junit.Test
+import kotlin.test.*
 
 class TestSubcommands {
     @Test fun testSubcommands() {
