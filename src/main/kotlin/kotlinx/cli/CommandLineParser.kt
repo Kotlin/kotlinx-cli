@@ -1,7 +1,7 @@
 package kotlinx.cli
 
 class CommandLineParser internal constructor(
-        private val cli: CommandLineInterface
+    private val cli: CommandLineInterface
 ) {
     fun parse(args: Array<out String>) {
         parse(args.asList())
@@ -86,14 +86,14 @@ class CommandLineParser internal constructor(
     private fun checkEnoughPositionals(positionalArgument: PositionalArgument, actualCount: Int) {
         if (actualCount < positionalArgument.minArgs) {
             throw CommandLineException(
-                    "Not enough positional arguments for ${positionalArgument.name}: " +
-                            "$actualCount, expected at least ${positionalArgument.minArgs}"
+                "Not enough positional arguments for ${positionalArgument.name}: " +
+                        "$actualCount, expected at least ${positionalArgument.minArgs}"
             )
         }
     }
 
     private fun tokenizeArgs(args: List<String>): List<String> =
-            args.flatMap { tokenizeArg(it) }
+        args.flatMap { tokenizeArg(it) }
 
     private fun tokenizeArg(arg: String): List<String> {
         if (cli.getFlagAction(arg) != null) return listOf(arg)
@@ -137,6 +137,6 @@ class CommandLineParser internal constructor(
     }
 
     private fun isShortTagPrefixed(arg: String) =
-            cli.shortTagPrefix != null && arg.startsWith(cli.shortTagPrefix) &&
-            cli.longTagPrefixes.none { arg.startsWith(it) }
+        cli.shortTagPrefix != null && arg.startsWith(cli.shortTagPrefix) &&
+                cli.longTagPrefixes.none { arg.startsWith(it) }
 }

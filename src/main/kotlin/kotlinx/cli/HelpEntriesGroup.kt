@@ -1,8 +1,8 @@
 package kotlinx.cli
 
 class HelpEntriesGroup(
-        val parent: CommandLineInterface,
-        private val description: String
+    val parent: CommandLineInterface,
+    private val description: String
 ) : CommandLineBuilder, HelpEntry {
     private val helpEntries = ArrayList<HelpEntry>()
 
@@ -33,20 +33,20 @@ class HelpEntriesGroup(
 
 
 fun CommandLineInterface.helpEntriesGroup(description: String) =
-        HelpEntriesGroup(this, description).also { addHelpEntry(it) }
+    HelpEntriesGroup(this, description).also { addHelpEntry(it) }
 
 fun HelpEntriesGroup.help(flags: List<String>, help: String, helpPrinter: HelpPrinter, exitAfterHelp: Boolean = true) =
-        registerAction(object : FlagActionBase(flags, help) {
-            override fun invoke() {
-                parent.printHelp(helpPrinter)
-                if (exitAfterHelp) {
-                    throw HelpPrintedException()
-                }
+    registerAction(object : FlagActionBase(flags, help) {
+        override fun invoke() {
+            parent.printHelp(helpPrinter)
+            if (exitAfterHelp) {
+                throw HelpPrintedException()
             }
-        })
+        }
+    })
 
 fun HelpEntriesGroup.help(flags: List<String>, help: String, exitAfterHelp: Boolean = true) =
-        help(flags, help, parent.defaultHelpPrinter!!, exitAfterHelp)
+    help(flags, help, parent.defaultHelpPrinter!!, exitAfterHelp)
 
 fun HelpEntriesGroup.help(exitAfterHelp: Boolean = true) =
-        help(listOf("-h", "--help"), "Prints help page", parent.defaultHelpPrinter!!, exitAfterHelp)
+    help(listOf("-h", "--help"), "Prints help page", parent.defaultHelpPrinter!!, exitAfterHelp)

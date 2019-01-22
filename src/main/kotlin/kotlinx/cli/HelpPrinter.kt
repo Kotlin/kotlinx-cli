@@ -36,8 +36,7 @@ class SimpleHelpPrinter(private val syntaxWidth: Int) : HelpPrinter {
     override fun printEntry(helpEntry: String, description: String) {
         if (helpEntry.length <= syntaxWidth) {
             println("  ${helpEntry.padEnd(syntaxWidth)}  $description")
-        }
-        else {
+        } else {
             println("  $helpEntry")
             println("  ${"".padEnd(syntaxWidth)}  $description")
         }
