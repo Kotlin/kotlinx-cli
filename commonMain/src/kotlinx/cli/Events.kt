@@ -7,8 +7,8 @@ interface Event<out T> {
 interface Listener<in T> {
     fun onEvent(value: T)
 }
-
-inline fun <T> Event<T>.add(crossinline listener: (T) -> Unit) {
+ 
+fun <T> Event<T>.add(listener: (T) -> Unit) {
     addListener(object : Listener<T> {
         override fun onEvent(value: T) {
             listener(value)
