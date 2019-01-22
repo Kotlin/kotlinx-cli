@@ -1,7 +1,6 @@
 package kotlinx.cli
 
-import org.junit.Test
-import kotlin.test.assertEquals
+import kotlin.test.*
 
 class TestDoubleDash {
     @Test fun testDoubleDash() {

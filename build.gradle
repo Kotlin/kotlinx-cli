@@ -1,19 +1,92 @@
 buildscript {
-    ext.kotlin_version = '1.3.11'
-
     repositories {
         mavenCentral()
+        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
         maven { url 'https://dl.bintray.com/kotlin/kotlin-dev' }
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
+plugins {
+    id 'org.jetbrains.kotlin.multiplatform' version "1.3.20-eap-113"
+}
 
+repositories {
+    mavenCentral()
+    maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
+    maven { url 'https://dl.bintray.com/kotlin/kotlin-dev' }
+}
 
+kotlin {
+    jvm {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = '1.8'
+            }
+        }
+    }
+
+    js {
+        compilations.all {
+            kotlinOptions {
+                sourceMap = true
+                moduleKind = "umd"
+            }
+        }
+    }
+
+    // For ARM, preset should be changed to presets.iosArm32 or presets.iosArm64
+    // For Linux, preset should be changed to e.g. presets.linuxX64
+    // For MacOS, preset should be changed to e.g. presets.macosX64
+    macosX64('native')
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
+            }
+        }
+        commonTest {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-test-common'
+                implementation 'org.jetbrains.kotlin:kotlin-test-annotations-common'
+            }
+        }
+        jvmMain {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+            }
+        }
+        jvmTest {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-test'
+                implementation 'org.jetbrains.kotlin:kotlin-test-junit'
+            }
+        }
+        jsMain {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
+            }
+        }
+        jsTest {
+            dependencies {
+                implementation 'org.jetbrains.kotlin:kotlin-test-js'
+            }
+        }
+        nativeMain {
+        }
+        nativeTest {
+        }
+    }
+
+    sourceSets.all {
+        kotlin.srcDirs = ["$it.name/src"]
+        resources.srcDirs = ["$it.name/resources"]
+        languageSettings.progressiveMode = true
+    }
+}
+
+/*
 allprojects {
-    apply plugin: 'kotlin'
     apply plugin: 'maven-publish'
 
     version = "0.1"
@@ -34,7 +107,9 @@ allprojects {
         classifier = 'sources'
     }
 }
+*/
 
+/*
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -66,3 +141,4 @@ publishing {
         }
     }
 }
+*/

@@ -1,9 +1,10 @@
 package kotlinx.cli
 
-import org.junit.Test
+import kotlin.test.*
 
 class TestAntExample {
-    @Test fun testAntExample() {
+    @Test
+    fun testAntExample() {
         /*
             This example demonstrates how to build a "real life" CLI, like the one of 'ant' command
             (see https://commons.apache.org/proper/commons-cli/usage.html),
