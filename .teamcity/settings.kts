@@ -31,6 +31,9 @@ val publishVersion = "0.1.0"
 val platforms = listOf("Windows", "Linux", "Mac OS X")
 
 project {
+    // This value is transformed by gradle plugin
+    name = "kotlinx-cli"
+
     // Disable editing of project and build settings from the UI to avoid issues with TeamCity
     params {
         param("teamcity.ui.settings.readOnly", "true")
