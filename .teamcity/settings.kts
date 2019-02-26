@@ -166,6 +166,7 @@ fun Project.deploy(platform: String, configureBuild: BuildType) = platform(platf
     maxRunningBuilds = 1
     params {
         param(versionSuffixParameter, "${configureBuild.depParamRefs[versionSuffixParameter]}")
+        param(releaseVersionParameter, "${configureBuild.depParamRefs[releaseVersionParameter]}")
         param("bintray-user", bintrayUserName)
         password("bintray-key", bintrayToken)
     }
