@@ -1,144 +1,46 @@
 buildscript {
     repositories {
-        mavenCentral()
-        maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
-        maven { url 'https://dl.bintray.com/kotlin/kotlin-dev' }
-    }
-}
-
-plugins {
-    id 'org.jetbrains.kotlin.multiplatform' version "1.3.20-eap-113"
-}
-
-repositories {
-    mavenCentral()
-    maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
-    maven { url 'https://dl.bintray.com/kotlin/kotlin-dev' }
-}
-
-kotlin {
-    jvm {
-        compilations.all {
-            kotlinOptions {
-                jvmTarget = '1.8'
-            }
-        }
-    }
-
-    js {
-        compilations.all {
-            kotlinOptions {
-                sourceMap = true
-                moduleKind = "umd"
-            }
-        }
-    }
-
-    // For ARM, preset should be changed to presets.iosArm32 or presets.iosArm64
-    // For Linux, preset should be changed to e.g. presets.linuxX64
-    // For MacOS, preset should be changed to e.g. presets.macosX64
-    macosX64('native')
-
-    sourceSets {
-        commonMain {
-            dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
-            }
-        }
-        commonTest {
-            dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-test-common'
-                implementation 'org.jetbrains.kotlin:kotlin-test-annotations-common'
-            }
-        }
-        jvmMain {
-            dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-            }
-        }
-        jvmTest {
-            dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-test'
-                implementation 'org.jetbrains.kotlin:kotlin-test-junit'
-            }
-        }
-        jsMain {
-            dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
-            }
-        }
-        jsTest {
-            dependencies {
-                implementation 'org.jetbrains.kotlin:kotlin-test-js'
-            }
-        }
-        nativeMain {
-        }
-        nativeTest {
-        }
-    }
-
-    sourceSets.all {
-        kotlin.srcDirs = ["$it.name/src"]
-        resources.srcDirs = ["$it.name/resources"]
-        languageSettings.progressiveMode = true
-    }
-}
-
-/*
-allprojects {
-    apply plugin: 'maven-publish'
-
-    version = "0.1"
-
-    repositories {
-        mavenCentral()
-        maven { url "https://dl.bintray.com/kotlin/kotlin-dev" }
+        jcenter()
+        gradlePluginPortal()
+        //maven { url "../kotlin-libraries-infra/build/maven" }
+        maven { url "https://dl.bintray.com/orangy/maven" }
     }
 
     dependencies {
-        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-        testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
-        testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
-    }
-
-    task sourcesJar(type: Jar) {
-        from sourceSets.main.allSource
-        classifier = 'sources'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "kotlinx.team:kotlinx.team.infra:0.1.0-dev-15"
     }
 }
-*/
 
-/*
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = "org.jetbrains.kotlinx"
-            artifactId = "cli" 
-            from components.java
-            artifact sourcesJar
-            pom {
-                name = 'kotlinx.cli'
-                description = 'Pure Kotlin implementation of a generic command-line parser'
-                url = 'https://github.com/Kotlin/kotlinx.cli'
-                licenses {
-                    license {
-                        name = 'The Apache License, Version 2.0'
-                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
-                    }
-                }
-                scm {
-                    connection = 'scm:git:https://github.com/Kotlin/kotlinx.cli'
-                    developerConnection = 'scm:git:ssh://git@github.com/Kotlin/kotlinx.cli'
-                    url = 'https://github.com/Kotlin/kotlinx.cli'
-                }
-            }
+apply plugin: 'kotlinx.team.infra'
+
+infra {
+    publishing {
+        include(":kotlinx-cli")
+
+        bintray {
+            organization = 'orangy'
+            repository = 'maven'
+            library = 'kotlinx-cli'
+
+            username = findProperty('bintrayUser')
+            password = findProperty('bintrayApiKey')
         }
     }
+
+    node {
+        version = '10.15.1'
+        mocha('4.1.0')
+        install("source-map-support", "0.5.3")
+        install("mocha-teamcity-reporter", "2.2.2")
+    }
+}
+
+allprojects {
     repositories {
-        maven {
-            url = "$buildDir/maven-repo"
-        }
+        mavenLocal()
+        jcenter()
     }
 }
-*/
+
+

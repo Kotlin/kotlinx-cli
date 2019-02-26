@@ -8,6 +8,9 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'kotlinx.cli'
+enableFeaturePreview('GRADLE_METADATA')
 
-//include 'kotlinx.cli.jvm'
+rootProject.name = 'kotlinx-cli-package'
+
+include ':core'
+project(":core").name='kotlinx-cli'

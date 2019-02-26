@@ -1,0 +1,104 @@
+import org.jetbrains.kotlin.konan.target.HostManager
+project.ext.hostManager = new HostManager()
+
+apply plugin: 'kotlin-multiplatform'
+apply from: rootProject.file("gradle/utility.gradle")
+
+kotlin {
+    if (project.ext.ideaActive) {
+        targets {
+            project.ext.nativeTarget = fromPreset(project.ext.ideaPreset, 'native')
+        }
+    } else {
+        macosX64('macosX64')
+        linuxX64('linuxX64')
+        mingwX64('mingwX64')
+    }
+
+    jvm {
+        compilations.all {
+            kotlinOptions {
+                jvmTarget = '1.8'
+            }
+        }
+    }
+
+    js {
+        compilations.all {
+            kotlinOptions {
+                sourceMap = true
+                moduleKind = "umd"
+                metaInfo = true
+            }
+        }
+    }
+
+    sourceSets.all {
+        kotlin.srcDirs = ["$it.name/src"]
+        resources.srcDirs = ["$it.name/resources"]
+        languageSettings {
+            progressiveMode = true
+            useExperimentalAnnotation("kotlin.Experimental")
+            useExperimentalAnnotation('kotlin.ExperimentalUnsignedTypes')
+        }
+    }
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                api "org.jetbrains.kotlin:kotlin-stdlib"
+            }
+        }
+
+        commonTest {
+            dependencies {
+                api 'org.jetbrains.kotlin:kotlin-test-common'
+                api 'org.jetbrains.kotlin:kotlin-test-annotations-common'
+            }
+        }
+
+        jvmMain {
+            dependencies {
+                api 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+
+            }
+        }
+        jvmTest {
+            dependencies {
+                api 'org.jetbrains.kotlin:kotlin-test-junit'
+            }
+        }
+
+        jsMain {
+            dependencies {
+                api 'org.jetbrains.kotlin:kotlin-stdlib-js'
+            }
+        }
+
+        jsTest {
+            dependencies {
+                api 'org.jetbrains.kotlin:kotlin-test-js'
+            }
+        }
+        
+        if (ideaActive) {
+            nativeMain {
+                kotlin.srcDir("${project.ext.nativeTarget.preset.name}Main/src")      
+            }
+        } else {
+            nativeMain {}
+            nativeTest {}
+
+            configure([linuxX64Main, macosX64Main, mingwX64Main]) {
+                dependsOn nativeMain
+            }
+
+            configure([linuxX64Test, macosX64Test, mingwX64Main]) {
+                dependsOn nativeTest
+            }
+        }
+
+        nativeMain.dependencies {
+        }
+    }
+}
