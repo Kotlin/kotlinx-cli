@@ -25,17 +25,16 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 */
 
 version = "2018.2"
-val versionParameter = "releaseVersion"
+val versionSuffixParameter = "versionSuffix"
+val teamcitySuffixParameter = "teamcitySuffix"
+val releaseVersionParameter = "releaseVersion"
 
-// This value is transformed by gradle plugin
-val publishVersion = "0.1.0"
+val bintrayUserName = "orangy"
+val bintrayToken = "credentialsJSON:9a48193c-d16d-46c7-8751-2fb434b09e07"
 
 val platforms = listOf("Windows", "Linux", "Mac OS X")
 
 project {
-    // This value is transformed by gradle plugin
-    name = "kotlinx-cli"
-
     // Disable editing of project and build settings from the UI to avoid issues with TeamCity
     params {
         param("teamcity.ui.settings.readOnly", "true")
@@ -72,7 +71,7 @@ fun Project.buildAll() = BuildType {
     id("Build_All")
     this.name = "Build (All)"
     type = BuildTypeSettings.Type.COMPOSITE
-
+    
     triggers {
         vcs {
             triggerRules = """
@@ -91,8 +90,9 @@ fun Project.build(platform: String) = platform(platform, "Build") {
             name = "Build and Test $platform Binaries"
             jdkHome = "%env.JDK_18_x64%"
             jvmArgs = "-Xmx1g"
-            // --continue is needed to run tests on all platforms even if one platform fails
-            tasks = "clean publishToBuildLocal check --continue"
+            tasks = "clean publishToBuildLocal check"
+            // --continue is needed to run tests for all targets even if one target fails
+            gradleParams = "-P$versionSuffixParameter=SNAPSHOT -P$teamcitySuffixParameter=%build.counter% --continue"
             buildFile = ""
             gradleWrapperPath = ""
         }
@@ -121,14 +121,15 @@ fun Project.deployConfigure() = BuildType {
     id("Deploy_Configure")
     this.name = "Deploy (Configure)"
     commonConfigure()
-    buildNumberPattern = "$publishVersion-dev-%build.counter%"
 
     params {
         // enable editing of this configuration to set up things
         param("teamcity.ui.settings.readOnly", "false")
-        param("bintray-user", "orangy")
-        password("bintray-key", "credentialsJSON:9a48193c-d16d-46c7-8751-2fb434b09e07")
-        param(versionParameter, "%build.number%")
+        param("bintray-user", bintrayUserName)
+        password("bintray-key", bintrayToken)
+        param(versionSuffixParameter, "dev-%build.counter%")
+        // Intentionally left empty. Gradle will ignore empty values and in custom build it can be specified
+        param(releaseVersionParameter, "") 
     }
 
     requirements {
@@ -140,7 +141,7 @@ fun Project.deployConfigure() = BuildType {
         gradle {
             name = "Verify Gradle Configuration"
             tasks = "clean publishBintrayCreateVersion"
-            gradleParams = "-P$versionParameter=%$versionParameter% -PbintrayApiKey=%bintray-key% -PbintrayUser=%bintray-user%"
+            gradleParams = "-P$versionSuffixParameter=%$versionSuffixParameter% -P$releaseVersionParameter=%$releaseVersionParameter% -PbintrayApiKey=%bintray-key% -PbintrayUser=%bintray-user%"
             buildFile = ""
             jdkHome = "%env.JDK_18%"
         }
@@ -151,9 +152,9 @@ fun Project.deployPublish(configureBuild: BuildType) = BuildType {
     id("Deploy_Publish")
     this.name = "Deploy (Publish)"
     type = BuildTypeSettings.Type.COMPOSITE
-    buildNumberPattern = "%releaseVersion% (%build.counter%)"
     params {
-        param(versionParameter, "${configureBuild.depParamRefs.buildNumber}")
+        param(versionSuffixParameter, "${configureBuild.depParamRefs[versionSuffixParameter]}")
+        param(releaseVersionParameter, "${configureBuild.depParamRefs[releaseVersionParameter]}")
     }
     commonConfigure()
 }.also { buildType(it) }.dependsOnSnapshot(configureBuild)
@@ -163,11 +164,10 @@ fun Project.deploy(platform: String, configureBuild: BuildType) = platform(platf
     type = BuildTypeSettings.Type.DEPLOYMENT
     enablePersonalBuilds = false
     maxRunningBuilds = 1
-    buildNumberPattern = "%releaseVersion% (%build.counter%)"
     params {
-        param(versionParameter, "${configureBuild.depParamRefs.buildNumber}")
-        param("bintray-user", "orangy")
-        password("bintray-key", "credentialsJSON:9a48193c-d16d-46c7-8751-2fb434b09e07")
+        param(versionSuffixParameter, "${configureBuild.depParamRefs[versionSuffixParameter]}")
+        param("bintray-user", bintrayUserName)
+        password("bintray-key", bintrayToken)
     }
 
     vcs {
@@ -179,7 +179,7 @@ fun Project.deploy(platform: String, configureBuild: BuildType) = platform(platf
             name = "Deploy $platform Binaries"
             jdkHome = "%env.JDK_18_x64%"
             jvmArgs = "-Xmx1g"
-            gradleParams = "-P$versionParameter=%$versionParameter% -PbintrayApiKey=%bintray-key% -PbintrayUser=%bintray-user%"
+            gradleParams = "-P$versionSuffixParameter=%$versionSuffixParameter% -P$releaseVersionParameter=%$releaseVersionParameter% -PbintrayApiKey=%bintray-key% -PbintrayUser=%bintray-user%"
             tasks = "clean build publish"
             buildFile = ""
             gradleWrapperPath = ""
