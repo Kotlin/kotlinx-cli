@@ -26,6 +26,8 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 
 version = "2018.2"
 val versionParameter = "releaseVersion"
+
+// This value is transformed by gradle plugin
 val publishVersion = "0.1.0"
 
 val platforms = listOf("Windows", "Linux", "Mac OS X")
