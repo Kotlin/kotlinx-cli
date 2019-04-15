@@ -2,7 +2,6 @@
 
 [![JetBrains incubator project](https://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
-> TODO download link
 
 Pure Kotlin implementation of a generic command-line parser.
 
@@ -15,6 +14,20 @@ for Kotlin/JVM, Kotlin/Native, and any other Kotlin console applications.
 Program defines what arguments are expected.
 `kotlinx.cli` will figure out how to parse those, reporting errors if the program arguments are invalid,
 and also generate help and usage messages as well.
+
+# Setup
+
+For JVM:  (using `jitpack.io`)
+```gradle
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    compile "com.github.kotlin.kotlinx~cli:kotlinx-cli-jvm:-SNAPSHOT"
+}
+```
+**Note: you will need to clear gradle cache if you want to update your kotlinx.cli dependency**
 
 ## Example
 
