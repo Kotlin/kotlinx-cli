@@ -33,6 +33,7 @@ val bintrayUserName = "orangy"
 val bintrayToken = "credentialsJSON:9a48193c-d16d-46c7-8751-2fb434b09e07"
 
 val platforms = listOf("Windows", "Linux", "Mac OS X")
+val jdk = "JDK_18_x64"
 
 project {
     // Disable editing of project and build settings from the UI to avoid issues with TeamCity
@@ -51,7 +52,7 @@ project {
         }
         buildAll.dependsOn(build) {
             artifacts {
-                artifactRules = "+:maven=>maven"
+                artifactRules = "+:maven=>maven\n+:api=>api"
             }
         }
     }
@@ -88,7 +89,7 @@ fun Project.build(platform: String) = platform(platform, "Build") {
     steps {
         gradle {
             name = "Build and Test $platform Binaries"
-            jdkHome = "%env.JDK_18_x64%"
+            jdkHome = "%env.$jdk%"
             jvmArgs = "-Xmx1g"
             tasks = "clean publishToBuildLocal check"
             // --continue is needed to run tests for all targets even if one target fails
@@ -99,7 +100,7 @@ fun Project.build(platform: String) = platform(platform, "Build") {
     }
 
     // What files to publish as build artifacts
-    artifactRules = "+:build/maven=>maven"
+    artifactRules = "+:build/maven=>maven\n+:build/api=>api"
 }
 
 fun BuildType.dependsOn(build: BuildType, configure: Dependency.() -> Unit) =
@@ -128,8 +129,6 @@ fun Project.deployConfigure() = BuildType {
         param("bintray-user", bintrayUserName)
         password("bintray-key", bintrayToken)
         param(versionSuffixParameter, "dev-%build.counter%")
-        // Intentionally left empty. Gradle will ignore empty values and in custom build it can be specified
-        param(releaseVersionParameter, "dev") 
     }
 
     requirements {
@@ -143,7 +142,7 @@ fun Project.deployConfigure() = BuildType {
             tasks = "clean publishBintrayCreateVersion"
             gradleParams = "--info --stacktrace -P$versionSuffixParameter=%$versionSuffixParameter% -P$releaseVersionParameter=%$releaseVersionParameter% -PbintrayApiKey=%bintray-key% -PbintrayUser=%bintray-user%"
             buildFile = ""
-            jdkHome = "%env.JDK_18%"
+            jdkHome = "%env.$jdk%"
         }
     }
 }.also { buildType(it) }
@@ -154,7 +153,10 @@ fun Project.deployPublish(configureBuild: BuildType) = BuildType {
     type = BuildTypeSettings.Type.COMPOSITE
     params {
         param(versionSuffixParameter, "${configureBuild.depParamRefs[versionSuffixParameter]}")
-        param(releaseVersionParameter, "${configureBuild.depParamRefs[releaseVersionParameter]}")
+
+        // Tell configuration build how to get release version parameter from this build
+        // "dev" is the default and means publishing is not releasing to public
+        param(configureBuild.reverseDepParamRefs[releaseVersionParameter].name, "dev")
     }
     commonConfigure()
 }.also { buildType(it) }.dependsOnSnapshot(configureBuild)
@@ -178,7 +180,7 @@ fun Project.deploy(platform: String, configureBuild: BuildType) = platform(platf
     steps {
         gradle {
             name = "Deploy $platform Binaries"
-            jdkHome = "%env.JDK_18_x64%"
+            jdkHome = "%env.$jdk%"
             jvmArgs = "-Xmx1g"
             gradleParams = "--info --stacktrace -P$versionSuffixParameter=%$versionSuffixParameter% -P$releaseVersionParameter=%$releaseVersionParameter% -PbintrayApiKey=%bintray-key% -PbintrayUser=%bintray-user%"
             tasks = "clean build publish"
