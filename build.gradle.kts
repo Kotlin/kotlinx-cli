@@ -28,7 +28,7 @@ infra {
         bintrayDev {
             organization = "kotlin"
             repository = "kotlin-dev"
-            library = "kotlinx.collections.immutable"
+            library = "kotlinx.cli"
             username = findProperty("bintrayUser") as String?
             password = findProperty("bintrayApiKey") as String?
         }
