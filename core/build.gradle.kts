@@ -1,7 +1,7 @@
 val kotlinVersion: String by project
 
 plugins {
-    kotlin("multiplatform") version "1.3.60-eap-76"
+    kotlin("multiplatform")
 }
 
 kotlin {
@@ -14,13 +14,13 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-stdlib-common:$kotlinVersion")
+                implementation("org.jetbrains.kotlin:kotlin-stdlib-common")
             }
         }
         val commonTest by getting {
             dependencies {
-                implementation("org.jetbrains.kotlin:kotlin-test-common:$kotlinVersion")
-                implementation("org.jetbrains.kotlin:kotlin-test-annotations-common:$kotlinVersion")
+                implementation("org.jetbrains.kotlin:kotlin-test-common")
+                implementation("org.jetbrains.kotlin:kotlin-test-annotations-common")
             }
         }
         val jvmMain by creating {
@@ -54,13 +54,8 @@ kotlin {
         }
     }
 
-    jvm {
-        compilations.all {
-            kotlinOptions {
-                freeCompilerArgs = listOf("-Xuse-experimental=kotlinx.cli.ExperimentalCli")
-                suppressWarnings = true
-            }
-        }
+    sourceSets.all {
+        languageSettings.useExperimentalAnnotation("kotlinx.cli.ExperimentalCli")
     }
 
     macosX64()
@@ -68,10 +63,6 @@ kotlin {
     mingwX64()
 
     configure(listOf(linuxX64(), macosX64(), mingwX64())) {
-        compilations.all {
-            kotlinOptions.freeCompilerArgs = listOf("-Xuse-experimental=kotlinx.cli.ExperimentalCli")
-            kotlinOptions.suppressWarnings = true
-        }
         compilations["main"].defaultSourceSet.dependsOn(sourceSets["nativeMain"])
         compilations["main"].defaultSourceSet.dependsOn(sourceSets["nativeTest"])
     }
@@ -83,7 +74,6 @@ kotlin {
                 moduleKind = "umd"
                 metaInfo = true
                 suppressWarnings = true
-                freeCompilerArgs = listOf("-Xuse-experimental=kotlinx.cli.ExperimentalCli")
             }
         }
     }

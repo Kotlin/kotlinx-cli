@@ -54,7 +54,6 @@ interface ArgumentValueDelegate<T> {
 /**
  * Abstract base class for subcommands.
  */
-@SinceKotlin("1.3")
 @ExperimentalCli
 abstract class Subcommand(val name: String): ArgParser(name) {
     /**
@@ -219,7 +218,6 @@ open class ArgParser(val programName: String, var useDefaultHelpShortName: Boole
      *
      * @param subcommandsList subcommands to add.
      */
-    @SinceKotlin("1.3")
     @ExperimentalCli
     fun subcommands(vararg subcommandsList: Subcommand) {
         subcommandsList.forEach {
