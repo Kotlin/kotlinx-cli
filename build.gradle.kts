@@ -3,8 +3,9 @@ buildscript {
         mavenCentral()
         maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
     }
+    val kotlinVersion: String by project
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.60-eap-76")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
 
