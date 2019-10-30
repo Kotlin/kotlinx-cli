@@ -1,5 +1,15 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.60-eap-76")
+    }
+}
+
 plugins {
-    id("kotlinx.team.infra") version "0.1.0-dev-50"
+    id("kotlinx.team.infra")
 }
 
 infra {

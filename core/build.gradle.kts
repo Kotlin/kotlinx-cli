@@ -3,15 +3,11 @@ plugins {
 }
 
 kotlin {
-    /*infra {
+    infra {
         target("macosX64")
         target("linuxX64")
         target("mingwX64")
-    }*/
-
-    macosX64()
-    linuxX64()
-    mingwX64()
+    }
 
     js {
         compilations.all {
@@ -60,22 +56,11 @@ kotlin {
                 implementation(kotlin("test-js"))
             }
         }
-        val nativeMain by creating {
-            dependsOn(commonMain)
-        }
-        val nativeTest by creating {
-            dependsOn(commonTest)
-        }
     }
 
     sourceSets.all {
         kotlin.setSrcDirs(listOf("$name/src"))
         resources.setSrcDirs(listOf("$name/resources"))
         languageSettings.useExperimentalAnnotation("kotlinx.cli.ExperimentalCli")
-    }
-
-    configure(listOf(linuxX64(), macosX64(), mingwX64())) {
-        compilations["main"].defaultSourceSet.dependsOn(sourceSets["nativeMain"])
-        compilations["main"].defaultSourceSet.dependsOn(sourceSets["nativeTest"])
     }
 }
