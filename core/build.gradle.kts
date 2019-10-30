@@ -1,5 +1,3 @@
-val kotlinVersion: String by project
-
 plugins {
     kotlin("multiplatform")
 }
@@ -55,6 +53,7 @@ kotlin {
     }
 
     sourceSets.all {
+        kotlin.setSrcDirs(listOf("$name/src"))
         languageSettings.useExperimentalAnnotation("kotlinx.cli.ExperimentalCli")
     }
 
