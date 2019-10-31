@@ -2,15 +2,21 @@ pluginManagement {
     repositories {
         mavenCentral()
         jcenter()
+        gradlePluginPortal()
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
         maven { url 'https://dl.bintray.com/kotlin/kotlin-dev' }
-        maven { url 'https://plugins.gradle.org/m2/' }
+        maven { url 'https://dl.bintray.com/kotlin/kotlinx' }
+    }
+
+    plugins {
+        id("kotlinx.team.infra") version "$infraVersion"
+        id("org.jetbrains.kotlin.multiplatform") version "$kotlinVersion"
     }
 }
 
 enableFeaturePreview('GRADLE_METADATA')
 
-rootProject.name = 'kotlinx-cli-package'
+rootProject.name = 'Kotlinx-Cli-Library'
 
 include ':core'
 project(":core").name='kotlinx-cli'
