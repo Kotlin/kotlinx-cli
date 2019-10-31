@@ -15,7 +15,6 @@ kotlin {
                 sourceMap = true
                 moduleKind = "umd"
                 metaInfo = true
-                suppressWarnings = true
             }
         }
     }
@@ -50,7 +49,7 @@ kotlin {
                 implementation(kotlin("stdlib-js"))
             }
         }
-        // JVM-specific tests and their dependencies:
+        // JS-specific tests and their dependencies:
         val jsTest by getting {
             dependencies {
                 implementation(kotlin("test-js"))
@@ -61,6 +60,9 @@ kotlin {
     sourceSets.all {
         kotlin.setSrcDirs(listOf("$name/src"))
         resources.setSrcDirs(listOf("$name/resources"))
-        languageSettings.useExperimentalAnnotation("kotlinx.cli.ExperimentalCli")
+        languageSettings.apply {
+            useExperimentalAnnotation("kotlin.Experimental")
+            useExperimentalAnnotation("kotlinx.cli.ExperimentalCli")
+        }
     }
 }
