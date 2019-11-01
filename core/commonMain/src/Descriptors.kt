@@ -36,7 +36,7 @@ internal abstract class Descriptor<T : Any, TResult>(val type: ArgType<T>,
      */
     fun valueDescription(value: TResult?) = value?.let {
         if (it is List<*> && it.isNotEmpty())
-            " [${it.joinToString { it.toString() }}]"
+            " [${it.joinToString()}]"
         else if (it !is List<*>)
             " [$it]"
         else null
@@ -90,9 +90,9 @@ internal class OptionDescriptor<T : Any, TResult>(
             result.append("    $optionFullFormPrefix$fullName")
             shortName?.let { result.append(", $optionShortFromPrefix$it") }
             valueDescription(defaultValue)?.let {
-                result.append("$it")
+                result.append(it)
             }
-            description?.let {result.append(" -> ${it}")}
+            description?.let {result.append(" -> $it")}
             if (required) result.append(" (always required)")
             result.append(" ${type.description}")
             deprecatedWarning?.let { result.append(" Warning: $it") }
@@ -140,9 +140,9 @@ internal class ArgDescriptor<T : Any, TResult>(
             val result = StringBuilder()
             result.append("    ${fullName}")
             valueDescription(defaultValue)?.let {
-                result.append("$it")
+                result.append(it)
             }
-            description?.let { result.append(" -> ${it}") }
+            description?.let { result.append(" -> $it") }
             if (!required) result.append(" (optional)")
             result.append(" ${type.description}")
             deprecatedWarning?.let { result.append(" Warning: $it") }
