@@ -18,6 +18,8 @@ abstract class CLIEntity<TResult> internal constructor(internal val owner: CLIEn
      * Wrapper  for element - read only property.
      * Needed to close set of variable [cliElement].
      */
+    // TODO: Initialized only from constructors and never changed after
+    //       remove lateinit, make val
     lateinit var delegate: ArgumentValueDelegate<TResult>
         internal set
 
@@ -34,6 +36,7 @@ abstract class CLIEntity<TResult> internal constructor(internal val owner: CLIEn
     val valueOrigin: ArgParser.ValueOrigin
         get() = (delegate as ParsingValue<*, *>).valueOrigin
 
+    // TODO: should it be a single-shot method?
     operator fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ArgumentValueDelegate<TResult> {
         (delegate as ParsingValue<*, *>).provideName(prop.name)
         return delegate
@@ -101,6 +104,7 @@ class MultipleArgument<T : Any> internal constructor(descriptor: ArgDescriptor<T
  */
 fun <T : Any, TResult> AbstractSingleArgument<T, TResult>.multiple(value: Int): MultipleArgument<T> {
     if (value < 2) {
+        // TODO: use `require` to throw an IllegalArgumentException
         error("multiple() modifier with value less than 2 is unavailable. It's already set to 1.")
     }
     val newArgument = with((delegate as ParsingValue<T, T>).descriptor as ArgDescriptor) {
@@ -143,6 +147,7 @@ fun <T: Any, TResult> AbstractSingleArgument<T, TResult>.default(value: T): Sing
  */
 fun <T: Any> MultipleArgument<T>.default(value: Collection<T>): MultipleArgument<T> {
     if (value.isEmpty()) {
+        // TODO: use `require` to throw an IllegalArgumentException
         error("Default value for argument can't be empty collection.")
     }
     val newArgument = with((delegate as ParsingValue<T, List<T>>).descriptor as ArgDescriptor) {
@@ -177,4 +182,5 @@ fun <T: Any> MultipleArgument<T>.optional(): MultipleArgument<T> {
     return newArgument
 }
 
+// TODO: internal
 fun failAssertion(message: String): Nothing = throw AssertionError(message)

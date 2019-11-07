@@ -23,6 +23,7 @@ abstract class ArgType<T : Any>(val hasParameter: kotlin.Boolean) {
      *
      * @param value value
      */
+    // TODO: Can be made abstract fun
     abstract val conversion: (value: kotlin.String, name: kotlin.String)->T
 
     /**

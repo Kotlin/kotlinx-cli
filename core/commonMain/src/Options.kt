@@ -9,6 +9,7 @@ import kotlin.reflect.KProperty
 /**
  * Base interface for all possible types of options with multiple values.
  */
+// TODO: Make subclasses nested and shorten their names, e.g. MultipleOptionType.Repeated
 interface MultipleOptionType
 
 /**
@@ -132,6 +133,7 @@ fun <T: Any, OptionType: MultipleOptionType>
         MultipleOption<T, OptionType>.default(value: Collection<T>): MultipleOption<T, OptionType> {
     val newOption = with((delegate as ParsingValue<T, List<T>>).descriptor as OptionDescriptor) {
         if (value.isEmpty()) {
+            // TODO: use `require` to throw an IllegalArgumentException
             error("Default value for option can't be empty collection.")
         }
         MultipleOption<T, OptionType>(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type, fullName,

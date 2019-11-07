@@ -175,6 +175,7 @@ open class ArgParser(val programName: String, var useDefaultHelpShortName: Boole
     private fun inspectRequiredAndDefaultUsage() {
         var previousArgument: ParsingValue<*, *>? = null
         arguments.forEach { (_, currentArgument) ->
+            // TODO: 'let' body never executes
             previousArgument?.let {
                 // Previous argument has default value.
                 it.descriptor.defaultValue?.let {
@@ -240,6 +241,7 @@ open class ArgParser(val programName: String, var useDefaultHelpShortName: Boole
      *
      * @param message error message.
      */
+    // TODO: Should it be non-public?
     fun printError(message: String): Nothing {
         error("$message\n${makeUsage()}")
     }
@@ -299,6 +301,7 @@ open class ArgParser(val programName: String, var useDefaultHelpShortName: Boole
     fun parse(args: Array<String>) = parse(args.asList())
 
     protected fun parse(args: List<String>): ArgParserResult {
+        // TODO: here we finalize parser setup, but what if 'parse' is called multiple times?
         // Add help option.
         val helpDescriptor = if (useDefaultHelpShortName) OptionDescriptor<Boolean, Boolean>(optionFullFormPrefix,
                 optionShortFromPrefix, ArgType.Boolean,
