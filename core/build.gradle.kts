@@ -10,6 +10,8 @@ kotlin {
     }
 
     js {
+        nodejs {
+        }
         compilations.all {
             kotlinOptions {
                 sourceMap = true
