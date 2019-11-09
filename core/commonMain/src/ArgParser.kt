@@ -73,14 +73,18 @@ class ArgParserResult(val commandName: String)
 /**
  * Arguments parser.
  *
- * @property programName name of current program.
- * @property useDefaultHelpShortName add or not -h flag for help message.
- * @property prefixStyle style of expected options prefix.
- * @property skipExtraArguments just skip extra arguments in command line string without producing error message.
+ * @property programName the name of the current program.
+ * @property useDefaultHelpShortName specifies whether to register "-h" option for printing the usage information.
+ * @property prefixStyle the style of option prefixing.
+ * @property skipExtraArguments specifies whether the extra unmatched arguments in a command line string
+ * can be skipped without producing an error message.
  */
-open class ArgParser(val programName: String, var useDefaultHelpShortName: Boolean = true,
-                     var prefixStyle: OPTION_PREFIX_STYLE = OPTION_PREFIX_STYLE.LINUX,
-                     var skipExtraArguments: Boolean = false) {
+open class ArgParser(
+    val programName: String,
+    var useDefaultHelpShortName: Boolean = true,
+    var prefixStyle: OPTION_PREFIX_STYLE = OPTION_PREFIX_STYLE.LINUX,
+    var skipExtraArguments: Boolean = false
+) {
 
     /**
      * Map of options: key - full name of option, value - pair of descriptor and parsed values.
@@ -128,39 +132,61 @@ open class ArgParser(val programName: String, var useDefaultHelpShortName: Boole
     protected val fullCommandName = mutableListOf(programName)
 
     /**
-     * Origin of option/argument value.
-     *
-     * Possible values:
-     * SET_BY_USER - value of option was provided in command line string;
-     * SET_DEFAULT_VALUE - value of option wasn't provided in command line, but set using default value;
-     * UNSET - value of option is unset
-     * REDEFINED - value of option was redefined in source code after parsing.
+     * The way an option/argument has got its value.
      */
-    enum class ValueOrigin { SET_BY_USER, SET_DEFAULT_VALUE, UNSET, REDEFINED }
+    enum class ValueOrigin {
+        /* The value was parsed from command line arguments. */
+        SET_BY_USER,
+        /* The value was missing in command line, therefore the default value was used. */
+        SET_DEFAULT_VALUE,
+        /* The value is not yet initialized. */
+        // TODO: Do we need to distinguish the cases of not yet set and missing optional?
+        UNSET,
+        /* The value was redefined after parsing manually (usually with the property setter). */
+        REDEFINED,
+    }
 
     /**
-     * Options prefix style.
-     *
-     * Possible values:
-     * LINUX - Linux style, for full forms of options "--", for short form - "-"
-     * JVM - JVM style, both for full and short forms of options "-"
+     * The style of option prefixing.
      */
-    enum class OPTION_PREFIX_STYLE { LINUX, JVM }
+    // TODO: make enum name pascal-cased
+    enum class OPTION_PREFIX_STYLE {
+        /* Linux style: the full name of an option is prefixed with two hyphens "--" and the short name — with one "-". */
+        LINUX,
+        /* JVM style: both full and short names are prefixed with one hyphen "-". */
+        JVM,
+    }
 
     /**
-     * Add option with single possible value and get delegator to its value.
+     * Declares a named option and returns an object which can be used to access the option value
+     * after all arguments are parsed or to delegate a property for accessing the option value to.
      *
-     * @param type argument type, one of [ArgType].
-     * @param fullName argument full name.
-     * @param shortName option short name.
-     * @param description text description of Argument.
-     * @param deprecatedWarning text message with information in case if option is deprecated.
+     * By default, the option supports only a single value, is optional, and has no default value,
+     * therefore its value's type is `T?`.
+     *
+     * You can alter the option properties by chaining extensions for the option type on the returned object:
+     *   - [AbstractSingleOption.default] to provide a default value that is used when the option is not specified;
+     *   - [SingleNullableOption.required] to make the option non-optional;
+     *   - [AbstractSingleOption.delimiter] to allow specifying multiple values in one command line argument with a delimiter;
+     *   - [AbstractSingleOption.multiple] to allow specifying the option several times.
+     *
+     * @param type The type describing how to parse an option value from a string,
+     * an instance of [ArgType], e.g. [ArgType.String] or [ArgType.Choice].
+     * @param fullName the full name of the option, can be omitted if the option name is inferred
+     * from the name of a property delegated to this option.
+     * @param shortName the short name of the option, `null` if the option cannot be specified in a short form.
+     * @param description the description of the option used when rendering the usage information.
+     * @param deprecatedWarning the deprecation message for the option.
+     * Specifying anything except `null` makes this option deprecated. The message is rendered in a help message and
+     * issued as a warning when the option is encountered when parsing command line arguments.
      */
-    fun <T : Any>option(type: ArgType<T>,
-                        fullName: String? = null,
-                        shortName: String ? = null,
-                        description: String? = null,
-                        deprecatedWarning: String? = null): SingleNullableOption<T> {
+    fun <T : Any> option(
+        type: ArgType<T>,
+        fullName: String? = null,
+        shortName: String ? = null,
+        description: String? = null,
+        deprecatedWarning: String? = null
+    ): SingleNullableOption<T> {
         val option = SingleNullableOption(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type,
                 fullName, shortName, description, deprecatedWarning = deprecatedWarning), CLIEntityWrapper())
         option.owner.entity = option
@@ -196,17 +222,33 @@ open class ArgParser(val programName: String, var useDefaultHelpShortName: Boole
     }
 
     /**
-     * Add argument with single nullable value and get delegator to its value.
+     * Declares an argument and returns an object which can be used to access the argument value
+     * after all arguments are parsed or to delegate a property for accessing the argument value to.
      *
-     * @param type argument type, one of [ArgType].
-     * @param fullName argument full name.
-     * @param description text description of argument.
-     * @param deprecatedWarning text message with information in case if argument is deprecated.
+     * By default, the argument supports only a single value, is required, and has no default value,
+     * therefore its value's type is `T`.
+     *
+     * You can alter the argument properties by chaining extensions for the argument type on the returned object:
+     *   - [AbstractSingleArgument.default] to provide a default value that is used when the argument is not specified;
+     *   - [SingleArgument.optional] to allow omitting the argument;
+     *   - [AbstractSingleArgument.multiple] to require the argument to have exactly the number of values specified;
+     *   - [AbstractSingleArgument.vararg] to allow specifying an unlimited number of values for the _last_ argument.
+     *
+     * @param type The type describing how to parse an option value from a string,
+     * an instance of [ArgType], e.g. [ArgType.String] or [ArgType.Choice].
+     * @param fullName the full name of the argument, can be omitted if the argument name is inferred
+     * from the name of a property delegated to this argument.
+     * @param description the description of the argument used when rendering the usage information.
+     * @param deprecatedWarning the deprecation message for the argument.
+     * Specifying anything except `null` makes this argument deprecated. The message is rendered in a help message and
+     * issued as a warning when the argument is encountered when parsing command line arguments.
      */
-    fun <T : Any>argument(type: ArgType<T>,
-                          fullName: String? = null,
-                          description: String? = null,
-                          deprecatedWarning: String? = null) : SingleArgument<T> {
+    fun <T : Any> argument(
+        type: ArgType<T>,
+        fullName: String? = null,
+        description: String? = null,
+        deprecatedWarning: String? = null
+    ) : SingleArgument<T> {
         val argument = SingleArgument(ArgDescriptor(type, fullName, 1,
                 description, deprecatedWarning = deprecatedWarning), CLIEntityWrapper())
         argument.owner.entity = argument
@@ -215,7 +257,7 @@ open class ArgParser(val programName: String, var useDefaultHelpShortName: Boole
     }
 
     /**
-     * Add subcommands.
+     * Registers one or more subcommands.
      *
      * @param subcommandsList subcommands to add.
      */
@@ -237,7 +279,7 @@ open class ArgParser(val programName: String, var useDefaultHelpShortName: Boole
     }
 
     /**
-     * Output error. Also adds help usage information for easy understanding of problem.
+     * Outputs an error message adding the usage information after it.
      *
      * @param message error message.
      */
@@ -292,13 +334,16 @@ open class ArgParser(val programName: String, var useDefaultHelpShortName: Boole
             else null
 
     /**
-     * Parse arguments.
+     * Parses the provided array of command line arguments.
+     * After a successful parsing, the options and arguments declared in this parser get their values and can be accessed
+     * with the properties delegated to them.
      *
-     * @param args array with command line arguments.
+     * @param args the array with command line arguments.
      *
-     * @return true if all arguments were parsed successfully, otherwise return false and print help message.
+     * @return an [ArgParserResult] if all arguments were parsed successfully.
+     * Otherwise, prints the usage information and terminates the program execution.
      */
-    fun parse(args: Array<String>) = parse(args.asList())
+    fun parse(args: Array<String>): ArgParserResult = parse(args.asList())
 
     protected fun parse(args: List<String>): ArgParserResult {
         // TODO: here we finalize parser setup, but what if 'parse' is called multiple times?
@@ -419,7 +464,7 @@ open class ArgParser(val programName: String, var useDefaultHelpShortName: Boole
     }
 
     /**
-     * Create message with usage description.
+     * Creates a message with the usage information.
      */
     internal fun makeUsage(): String {
         val result = StringBuilder()
