@@ -41,11 +41,23 @@ internal class ArgumentsQueue(argumentsDescriptors: List<ArgDescriptor<*, *>>) {
 }
 
 /**
- * Interface of argument value.
+ * A property delegate that provides access to the argument/option value.
  */
 interface ArgumentValueDelegate<T> {
+    /**
+     * The value of an option or argument parsed from command line.
+     *
+     * Accessing this value before [ArgParser.parse] method is called will result in an exception.
+     *
+     * @see CLIEntity.value
+     */
+    // TODO: decide on the exception type
+    // TODO: decide whether 'set' is possible before calling 'parse'
     var value: T
+
+    /** Provides the value for the delegated property getter. Returns the [value] property. */
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T = value
+    /** Sets the [value] to the [ArgumentValueDelegate.value] property from the delegated property setter. */
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         this.value = value
     }
