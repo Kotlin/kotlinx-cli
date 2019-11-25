@@ -4,8 +4,6 @@
  */
 package kotlinx.cli
 
-import kotlin.reflect.KProperty
-
 /**
  * Parsing value of option/argument.
  */
@@ -18,8 +16,8 @@ internal abstract class ParsingValue<T: Any, TResult: Any>(val descriptor: Descr
     /**
      * Value origin.
      */
-    var valueOrigin = ArgParser.ValueOrigin.UNSET
-        protected set
+    var valueOrigin = ArgParser.ValueOrigin.UNDEFINED
+        internal set
 
     /**
      * Check if values of argument are empty.
@@ -76,9 +74,6 @@ internal abstract class ParsingValue<T: Any, TResult: Any>(val descriptor: Descr
      * Set default value to option.
      */
     fun addDefaultValue() {
-        if (!descriptor.defaultValueSet && descriptor.required) {
-            throw ParsingException("Please, provide value for ${descriptor.textDescription}. It should be always set.")
-        }
         if (descriptor.defaultValueSet) {
             parsedValue = descriptor.defaultValue!!
             valueOrigin = ArgParser.ValueOrigin.SET_DEFAULT_VALUE
@@ -93,6 +88,8 @@ internal abstract class ParsingValue<T: Any, TResult: Any>(val descriptor: Descr
     fun provideName(name: String) {
         descriptor.fullName ?: run { descriptor.fullName = name }
     }
+
+    abstract val hasDefaultValue: Boolean
 }
 
 /**
@@ -105,7 +102,7 @@ internal abstract class AbstractArgumentSingleValue<T: Any>(descriptor: Descript
 
     override fun saveValue(stringValue: String) {
         if (!valueIsInitialized()) {
-            parsedValue = descriptor.type.conversion(stringValue, descriptor.fullName!!)
+            parsedValue = descriptor.type.convert(stringValue, descriptor.fullName!!)
             valueOrigin = ArgParser.ValueOrigin.SET_BY_USER
         } else {
             throw ParsingException("Try to provide more than one value $parsedValue and $stringValue for ${descriptor.fullName}.")
@@ -113,6 +110,9 @@ internal abstract class AbstractArgumentSingleValue<T: Any>(descriptor: Descript
     }
 
     override fun isEmpty(): Boolean = !valueIsInitialized()
+
+    override val hasDefaultValue: Boolean
+        get() = descriptor.defaultValue != null
 }
 
 /**
@@ -165,9 +165,12 @@ internal class ArgumentMultipleValues<T : Any>(descriptor: Descriptor<T, List<T>
         set(value) = setDelegatedValue(value)
 
     override fun saveValue(stringValue: String) {
-        addedValue.add(descriptor.type.conversion(stringValue, descriptor.fullName!!))
+        addedValue.add(descriptor.type.convert(stringValue, descriptor.fullName!!))
         valueOrigin = ArgParser.ValueOrigin.SET_BY_USER
     }
 
     override fun isEmpty() = parsedValue.isEmpty()
+
+    override val hasDefaultValue: Boolean
+        get() = descriptor.defaultValue?.let { it.isNotEmpty() } ?: false
 }

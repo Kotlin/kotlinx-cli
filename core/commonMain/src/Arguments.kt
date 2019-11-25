@@ -9,17 +9,32 @@ import kotlin.reflect.KProperty
 internal data class CLIEntityWrapper(var entity: CLIEntity<*>? = null)
 
 /**
+ * Base interface for all possible types of entities with default anf required values.
+ *
+ * @see [SingleOption], [MultipleOption], [SingleArgument], [MultipleArgument].
+ */
+interface DefaultRequiredType {
+    /**
+     * Type of an entity with default value.
+     */
+    class Default : DefaultRequiredType
+
+    /**
+     * Type of an entity which value should always be provided in command line.
+     */
+    class Required : DefaultRequiredType
+
+    /**
+     * Type of entity which is optional and has no default value.
+     */
+    class None : DefaultRequiredType
+}
+
+/**
  * The base class for a command line argument or an option.
  */
-abstract class CLIEntity<TResult> internal constructor(internal val owner: CLIEntityWrapper) {
-    /**
-     * The delegate object returned by [provideDelegate] operator call.
-     */
-    // TODO: Initialized only from constructors and never changed after
-    //       remove lateinit, make val
-    lateinit var delegate: ArgumentValueDelegate<TResult>
-        internal set
-
+abstract class CLIEntity<TResult> internal constructor(val delegate: ArgumentValueDelegate<TResult>,
+                                                       internal val owner: CLIEntityWrapper) {
     /**
      * The value of the option or argument parsed from command line.
      *
@@ -28,17 +43,23 @@ abstract class CLIEntity<TResult> internal constructor(internal val owner: CLIEn
      *
      * @see ArgumentValueDelegate.value
      */
-    // TODO: decide on the exception type
-    // TODO: decide whether 'set' is possible before calling 'parse'
     var value: TResult
         get() = delegate.value
-        set(value) { delegate.value = value }
+        set(value) {
+            check((delegate as ParsingValue<*, *>).valueOrigin != ArgParser.ValueOrigin.UNDEFINED) {
+                "Resetting value of option/argument is only possible after parsing command line arguments." +
+                        " ArgParser.parse(...) method should be called before"
+            }
+            delegate.value = value
+        }
 
     /**
      * The origin of the option/argument value.
      */
     val valueOrigin: ArgParser.ValueOrigin
         get() = (delegate as ParsingValue<*, *>).valueOrigin
+
+    private var delegateProvided = false
 
     /**
      * Returns the delegate object for property delegation and initializes it with the name of the delegated property.
@@ -47,9 +68,12 @@ abstract class CLIEntity<TResult> internal constructor(internal val owner: CLIEn
      * to be used as an actual delegate and uses the name of the delegated property to initialize the full name
      * of the option/argument if it wasn't done during construction of that option/argument.
      */
-    // TODO: should it be a single-shot method?
     operator fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ArgumentValueDelegate<TResult> {
+        check(!delegateProvided) {
+            "There is already used delegate for ${(delegate as ParsingValue<*, *>).descriptor.fullName}."
+        }
         (delegate as ParsingValue<*, *>).provideName(prop.name)
+        delegateProvided = true
         return delegate
     }
 }
@@ -59,7 +83,8 @@ abstract class CLIEntity<TResult> internal constructor(internal val owner: CLIEn
  *
  * You can use [ArgParser.argument] function to declare an argument.
  */
-abstract class Argument<TResult> internal constructor(owner: CLIEntityWrapper): CLIEntity<TResult>(owner)
+abstract class Argument<TResult> internal constructor(delegate: ArgumentValueDelegate<TResult>,
+                                                      owner: CLIEntityWrapper): CLIEntity<TResult>(delegate, owner)
 
 /**
  * The base class of an argument with a single value.
@@ -68,7 +93,10 @@ abstract class Argument<TResult> internal constructor(owner: CLIEntityWrapper): 
  * An optional argument having nullable value is represented with the [SingleNullableArgument] inheritor.
  */
 // TODO: investigate if we can collapse two inheritors into the single base class and specialize extensions by TResult upper bound
-abstract class AbstractSingleArgument<T: Any, TResult> internal constructor(owner: CLIEntityWrapper): Argument<TResult>(owner) {
+abstract class AbstractSingleArgument<T: Any, TResult, DefaultRequired: DefaultRequiredType> internal constructor(
+    delegate: ArgumentValueDelegate<TResult>,
+    owner: CLIEntityWrapper):
+    Argument<TResult>(delegate, owner) {
     /**
      * Check descriptor for this kind of argument.
      */
@@ -84,11 +112,11 @@ abstract class AbstractSingleArgument<T: Any, TResult> internal constructor(owne
  *
  * The [value] of such argument is non-null.
  */
-class SingleArgument<T : Any> internal constructor(descriptor: ArgDescriptor<T, T>, owner: CLIEntityWrapper):
-        AbstractSingleArgument<T, T>(owner) {
+class SingleArgument<T : Any, DefaultRequired: DefaultRequiredType> internal constructor(descriptor: ArgDescriptor<T, T>,
+                                                   owner: CLIEntityWrapper):
+    AbstractSingleArgument<T, T, DefaultRequired>(ArgumentSingleValue(descriptor), owner) {
     init {
         checkDescriptor(descriptor)
-        delegate = ArgumentSingleValue(descriptor)
     }
 }
 
@@ -96,10 +124,9 @@ class SingleArgument<T : Any> internal constructor(descriptor: ArgDescriptor<T, 
  * An optional argument with nullable [value].
  */
 class SingleNullableArgument<T : Any> internal constructor(descriptor: ArgDescriptor<T, T>, owner: CLIEntityWrapper):
-        AbstractSingleArgument<T, T?>(owner){
+        AbstractSingleArgument<T, T?, DefaultRequiredType.None>(ArgumentSingleNullableValue(descriptor), owner) {
     init {
         checkDescriptor(descriptor)
-        delegate = ArgumentSingleNullableValue(descriptor)
     }
 }
 
@@ -108,29 +135,26 @@ class SingleNullableArgument<T : Any> internal constructor(descriptor: ArgDescri
  *
  * The [value] property of such argument has type `List<T>`.
  */
-class MultipleArgument<T : Any> internal constructor(descriptor: ArgDescriptor<T, List<T>>, owner: CLIEntityWrapper):
-        Argument<List<T>>(owner) {
+class MultipleArgument<T : Any, DefaultRequired: DefaultRequiredType> internal constructor(
+    descriptor: ArgDescriptor<T, List<T>>, owner: CLIEntityWrapper):
+        Argument<List<T>>(ArgumentMultipleValues(descriptor), owner) {
     init {
         if (descriptor.number != null && descriptor.number < 2) {
             failAssertion("Argument with multiple values can't be initialized with descriptor for single one.")
         }
-        delegate = ArgumentMultipleValues(descriptor)
     }
 }
 
 /**
  * Allows the argument to have several values specified in command line string.
  *
- * @param value the exact number of values expected for this argument, but at least 2.
+ * @param number the exact number of values expected for this argument, but at least 2.
  */
-// TODO: rename the parameter to 'number'?
-fun <T : Any, TResult> AbstractSingleArgument<T, TResult>.multiple(value: Int): MultipleArgument<T> {
-    if (value < 2) {
-        // TODO: use `require` to throw an IllegalArgumentException
-        error("multiple() modifier with value less than 2 is unavailable. It's already set to 1.")
-    }
+fun <T : Any, TResult, DefaultRequired: DefaultRequiredType>
+        AbstractSingleArgument<T, TResult, DefaultRequired>.multiple(number: Int): MultipleArgument<T, DefaultRequired> {
+    require(number >= 2) { "multiple() modifier with value less than 2 is unavailable. It's already set to 1." }
     val newArgument = with((delegate as ParsingValue<T, T>).descriptor as ArgDescriptor) {
-        MultipleArgument(ArgDescriptor(type, fullName, value, description, listOfNotNull(defaultValue),
+        MultipleArgument<T, DefaultRequired>(ArgDescriptor(type, fullName, number, description, listOfNotNull(defaultValue),
                 required, deprecatedWarning), owner)
     }
     owner.entity = newArgument
@@ -140,9 +164,10 @@ fun <T : Any, TResult> AbstractSingleArgument<T, TResult>.multiple(value: Int): 
 /**
  * Allows the last argument to take all the trailing values in command line string.
  */
-fun <T : Any, TResult> AbstractSingleArgument<T, TResult>.vararg(): MultipleArgument<T> {
+fun <T : Any, TResult, DefaultRequired: DefaultRequiredType> AbstractSingleArgument<T, TResult, DefaultRequired>.vararg():
+        MultipleArgument<T, DefaultRequired> {
     val newArgument = with((delegate as ParsingValue<T, T>).descriptor as ArgDescriptor) {
-        MultipleArgument(ArgDescriptor(type, fullName, null, description, listOfNotNull(defaultValue),
+        MultipleArgument<T, DefaultRequired>(ArgDescriptor(type, fullName, null, description, listOfNotNull(defaultValue),
                 required, deprecatedWarning), owner)
     }
     owner.entity = newArgument
@@ -153,11 +178,14 @@ fun <T : Any, TResult> AbstractSingleArgument<T, TResult>.vararg(): MultipleArgu
  * Specifies the default value for the argument, that will be used when no value is provided for the argument
  * in command line string.
  *
+ * Argument becomes optional, because value for it is set even if it isn't provided in command line.
+ *
  * @param value the default value.
  */
-fun <T: Any, TResult> AbstractSingleArgument<T, TResult>.default(value: T): SingleArgument<T> {
+fun <T: Any> SingleNullableArgument<T>.default(value: T): SingleArgument<T, DefaultRequiredType.Default> {
     val newArgument = with((delegate as ParsingValue<T, T>).descriptor as ArgDescriptor) {
-        SingleArgument(ArgDescriptor(type, fullName, number, description, value, required, deprecatedWarning), owner)
+        SingleArgument<T, DefaultRequiredType.Default>(ArgDescriptor(type, fullName, number, description, value,
+            false, deprecatedWarning), owner)
     }
     owner.entity = newArgument
     return newArgument
@@ -167,15 +195,15 @@ fun <T: Any, TResult> AbstractSingleArgument<T, TResult>.default(value: T): Sing
  * Specifies the default value for the argument with multiple values, that will be used when no values are provided
  * for the argument in command line string.
  *
+ * Argument becomes optional, because value for it is set even if it isn't provided in command line.
+ *
  * @param value the default value, must be a non-empty collection.
  */
-fun <T: Any> MultipleArgument<T>.default(value: Collection<T>): MultipleArgument<T> {
-    if (value.isEmpty()) {
-        // TODO: use `require` to throw an IllegalArgumentException
-        error("Default value for argument can't be empty collection.")
-    }
+fun <T: Any> MultipleArgument<T, DefaultRequiredType.None>.default(value: Collection<T>):
+        MultipleArgument<T, DefaultRequiredType.Default> {
+    require (value.isNotEmpty()) { "Default value for argument can't be empty collection." }
     val newArgument = with((delegate as ParsingValue<T, List<T>>).descriptor as ArgDescriptor) {
-        MultipleArgument(ArgDescriptor(type, fullName, number, description, value.toList(),
+        MultipleArgument<T, DefaultRequiredType.Default>(ArgDescriptor(type, fullName, number, description, value.toList(),
                 required, deprecatedWarning), owner)
     }
     owner.entity = newArgument
@@ -189,8 +217,7 @@ fun <T: Any> MultipleArgument<T>.default(value: Collection<T>): MultipleArgument
  *
  * Note that only trailing arguments can be optional, i.e. no required arguments can follow optional ones.
  */
-// TODO: decide the behavior of argument().default().optional()
-fun <T: Any> SingleArgument<T>.optional(): SingleNullableArgument<T> {
+fun <T: Any> SingleArgument<T, DefaultRequiredType.Required>.optional(): SingleNullableArgument<T> {
     val newArgument = with((delegate as ParsingValue<T, T>).descriptor as ArgDescriptor) {
         SingleNullableArgument(ArgDescriptor(type, fullName, number, description, defaultValue,
                 false, deprecatedWarning), owner)
@@ -206,14 +233,13 @@ fun <T: Any> SingleArgument<T>.optional(): SingleNullableArgument<T> {
  *
  * Note that only trailing arguments can be optional: no required arguments can follow the optional ones.
  */
-fun <T: Any> MultipleArgument<T>.optional(): MultipleArgument<T> {
+fun <T: Any> MultipleArgument<T, DefaultRequiredType.Required>.optional(): MultipleArgument<T, DefaultRequiredType.None> {
     val newArgument = with((delegate as ParsingValue<T, List<T>>).descriptor as ArgDescriptor) {
-        MultipleArgument(ArgDescriptor(type, fullName, number, description,
+        MultipleArgument<T, DefaultRequiredType.None>(ArgDescriptor(type, fullName, number, description,
                 defaultValue?.toList() ?: listOf(), false, deprecatedWarning), owner)
     }
     owner.entity = newArgument
     return newArgument
 }
 
-// TODO: internal
-fun failAssertion(message: String): Nothing = throw AssertionError(message)
+internal fun failAssertion(message: String): Nothing = throw AssertionError(message)
