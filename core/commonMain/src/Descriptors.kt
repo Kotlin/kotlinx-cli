@@ -78,7 +78,8 @@ internal class OptionDescriptor<T : Any, TResult>(
         required: Boolean = false,
         val multiple: Boolean = false,
         val delimiter: String? = null,
-        deprecatedWarning: String? = null) : Descriptor<T, TResult>(type, fullName, description, defaultValue,
+        deprecatedWarning: String? = null,
+        val hidden: Boolean = false) : Descriptor<T, TResult>(type, fullName, description, defaultValue,
         required, deprecatedWarning) {
 
     override val textDescription: String

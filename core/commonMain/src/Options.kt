@@ -88,7 +88,7 @@ fun <T : Any, TResult> AbstractSingleOption<T, TResult>.multiple(): MultipleOpti
     val newOption = with((delegate as ParsingValue<T, T>).descriptor as OptionDescriptor) {
         MultipleOption<T, RepeatedOption>(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
                 description, listOfNotNull(defaultValue),
-                required, true, delimiter, deprecatedWarning), owner)
+                required, true, delimiter, deprecatedWarning, hidden), owner)
     }
     owner.entity = newOption
     return newOption
@@ -104,7 +104,7 @@ fun <T : Any> MultipleOption<T, DelimitedOption>.multiple(): MultipleOption<T, R
         }
         MultipleOption<T, RepeatedDelimitedOption>(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
                 description, defaultValue?.toList() ?: listOf(),
-                required, true, delimiter, deprecatedWarning), owner)
+                required, true, delimiter, deprecatedWarning, hidden), owner)
     }
     owner.entity = newOption
     return newOption
@@ -118,7 +118,7 @@ fun <T : Any> MultipleOption<T, DelimitedOption>.multiple(): MultipleOption<T, R
 fun <T: Any, TResult> AbstractSingleOption<T, TResult>.default(value: T): SingleOption<T> {
     val newOption = with((delegate as ParsingValue<T, T>).descriptor as OptionDescriptor) {
         SingleOption(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, value, required, multiple, delimiter, deprecatedWarning), owner)
+                description, value, required, multiple, delimiter, deprecatedWarning, hidden), owner)
     }
     owner.entity = newOption
     return newOption
@@ -138,7 +138,7 @@ fun <T: Any, OptionType: MultipleOptionType>
         }
         MultipleOption<T, OptionType>(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type, fullName,
                 shortName, description, value.toList(),
-                required, multiple, delimiter, deprecatedWarning), owner)
+                required, multiple, delimiter, deprecatedWarning, hidden), owner)
     }
     owner.entity = newOption
     return newOption
@@ -151,7 +151,7 @@ fun <T: Any> SingleNullableOption<T>.required(): SingleOption<T> {
     val newOption = with((delegate as ParsingValue<T, T>).descriptor as OptionDescriptor) {
         SingleOption(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type, fullName,
                 shortName, description, defaultValue,
-                true, multiple, delimiter, deprecatedWarning), owner)
+                true, multiple, delimiter, deprecatedWarning, hidden), owner)
     }
     owner.entity = newOption
     return newOption
@@ -165,7 +165,7 @@ fun <T: Any, OptionType: MultipleOptionType>
     val newOption = with((delegate as ParsingValue<T, List<T>>).descriptor as OptionDescriptor) {
         MultipleOption<T, OptionType>(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
                 description, defaultValue?.toList() ?: listOf(),
-                true, multiple, delimiter, deprecatedWarning), owner)
+                true, multiple, delimiter, deprecatedWarning, hidden), owner)
     }
     owner.entity = newOption
     return newOption
@@ -180,7 +180,7 @@ fun <T : Any, TResult> AbstractSingleOption<T, TResult>.delimiter(delimiterValue
     val newOption = with((delegate as ParsingValue<T, T>).descriptor as OptionDescriptor) {
         MultipleOption<T, DelimitedOption>(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
                 description, listOfNotNull(defaultValue),
-                required, multiple, delimiterValue, deprecatedWarning), owner)
+                required, multiple, delimiterValue, deprecatedWarning, hidden), owner)
     }
     owner.entity = newOption
     return newOption
@@ -195,7 +195,7 @@ fun <T : Any> MultipleOption<T, RepeatedOption>.delimiter(delimiterValue: String
     val newOption = with((delegate as ParsingValue<T, List<T>>).descriptor as OptionDescriptor) {
         MultipleOption<T, RepeatedDelimitedOption>(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
                 description, defaultValue?.toList() ?: listOf(),
-                required, multiple, delimiterValue, deprecatedWarning), owner)
+                required, multiple, delimiterValue, deprecatedWarning, hidden), owner)
     }
     owner.entity = newOption
     return newOption

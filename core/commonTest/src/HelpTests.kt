@@ -33,15 +33,16 @@ class HelpTests {
         val expectedOutput = """
 Usage: test options_list
 Arguments: 
-    mainReport -> Main report for analysis { String }
     compareToReport -> Report to compare to (optional) { String }
+    mainReport -> Main report for analysis { String }
 Options: 
-    --output, -o -> Output file { String }
     --eps, -e [$epsDefault] -> Meaningful performance changes { Double }
-    --short, -s [false] -> Show short version of report 
-    --renders, -r [text] -> Renders for showing information { Value should be one of [text, html, teamcity, statistics, metrics] }
-    --user, -u -> User access information for authorization { String }
     --help, -h -> Usage info 
+    --help-hidden -> Display help for hidden options 
+    --output, -o -> Output file { String }
+    --renders, -r [text] -> Renders for showing information { Value should be one of [text, html, teamcity, statistics, metrics] }
+    --short, -s [false] -> Show short version of report 
+    --user, -u -> User access information for authorization { String }
         """.trimIndent()
         assertEquals(expectedOutput, helpOutput)
     }
@@ -85,18 +86,64 @@ Usage: test summary options_list
 Arguments: 
     mainReport -> Main report for analysis { String }
 Options: 
-    --exec [geomean] -> Execution time way of calculation { Value should be one of [samples, geomean] }
-    --exec-samples -> Samples used for execution time metric (value 'all' allows use all samples) { String }
-    --exec-normalize -> File with golden results which should be used for normalization { String }
-    --compile [geomean] -> Compile time way of calculation { Value should be one of [samples, geomean] }
-    --compile-samples -> Samples used for compile time metric (value 'all' allows use all samples) { String }
-    --compile-normalize -> File with golden results which should be used for normalization { String }
     --codesize [geomean] -> Code size way of calculation { Value should be one of [samples, geomean] }
-    --codesize-samples -> Samples used for code size metric (value 'all' allows use all samples) { String }
     --codesize-normalize -> File with golden results which should be used for normalization { String }
-    --user, -u -> User access information for authorization { String }
+    --codesize-samples -> Samples used for code size metric (value 'all' allows use all samples) { String }
+    --compile [geomean] -> Compile time way of calculation { Value should be one of [samples, geomean] }
+    --compile-normalize -> File with golden results which should be used for normalization { String }
+    --compile-samples -> Samples used for compile time metric (value 'all' allows use all samples) { String }
+    --exec [geomean] -> Execution time way of calculation { Value should be one of [samples, geomean] }
+    --exec-normalize -> File with golden results which should be used for normalization { String }
+    --exec-samples -> Samples used for execution time metric (value 'all' allows use all samples) { String }
     --help, -h -> Usage info 
+    --help-hidden -> Display help for hidden options 
+    --user, -u -> User access information for authorization { String }
 """.trimIndent()
         assertEquals(expectedOutput, helpOutput)
+    }
+
+    @Test
+    fun testHelpHiddenMessage() {
+        val argParser = ArgParser("test")
+        val mainReport by argParser.argument(ArgType.String, description = "Main report for analysis")
+        val compareToReport by argParser.argument(ArgType.String, description = "Report to compare to").optional()
+
+        val output by argParser.option(ArgType.String, shortName = "o", description = "Output file")
+        val epsValue by argParser.option(ArgType.Double, "eps", "e", "Meaningful performance changes",
+            hidden = true)
+            .default(1.0)
+        val useShortForm by argParser.option(ArgType.Boolean, "short", "s",
+            "Show short version of report").default(false)
+        val renders by argParser.option(ArgType.Choice(listOf("text", "html", "teamcity", "statistics", "metrics")),
+            shortName = "r", description = "Renders for showing information").multiple().default(listOf("text"))
+        val user by argParser.option(ArgType.String, shortName = "u", description = "User access information for authorization",
+            hidden = true)
+        argParser.parse(arrayOf("main.txt"))
+        val helpOutput = argParser.makeUsage().trimIndent()
+        @Suppress("CanBeVal") // can't be val in order to build expectedOutput only in run time.
+        var epsDefault = 1.0
+        val expectedOutputHelp = """
+Usage: test options_list
+Arguments: 
+    compareToReport -> Report to compare to (optional) { String }
+    mainReport -> Main report for analysis { String }
+Options: 
+    --help, -h -> Usage info 
+    --help-hidden -> Display help for hidden options 
+    --output, -o -> Output file { String }
+    --renders, -r [text] -> Renders for showing information { Value should be one of [text, html, teamcity, statistics, metrics] }
+    --short, -s [false] -> Show short version of report 
+""".trimIndent()
+        assertEquals(expectedOutputHelp, helpOutput)
+
+        val helpHiddenOutput = argParser.makeUsage(true).trimIndent()
+        @Suppress("CanBeVal") // can't be val in order to build expectedOutput only in run time.
+        val expectedOutputHelpHidden = """
+Usage: test options_list
+Hidden options: 
+    --eps, -e [$epsDefault] -> Meaningful performance changes { Double }
+    --user, -u -> User access information for authorization { String }
+        """.trimIndent()
+        assertEquals(expectedOutputHelpHidden, helpHiddenOutput)
     }
 }
