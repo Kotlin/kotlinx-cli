@@ -88,8 +88,6 @@ internal abstract class ParsingValue<T: Any, TResult: Any>(val descriptor: Descr
     fun provideName(name: String) {
         descriptor.fullName ?: run { descriptor.fullName = name }
     }
-
-    abstract val hasDefaultValue: Boolean
 }
 
 /**
@@ -110,9 +108,6 @@ internal abstract class AbstractArgumentSingleValue<T: Any>(descriptor: Descript
     }
 
     override fun isEmpty(): Boolean = !valueIsInitialized()
-
-    override val hasDefaultValue: Boolean
-        get() = descriptor.defaultValue != null
 }
 
 /**
@@ -170,7 +165,4 @@ internal class ArgumentMultipleValues<T : Any>(descriptor: Descriptor<T, List<T>
     }
 
     override fun isEmpty() = parsedValue.isEmpty()
-
-    override val hasDefaultValue: Boolean
-        get() = descriptor.defaultValue?.let { it.isNotEmpty() } ?: false
 }

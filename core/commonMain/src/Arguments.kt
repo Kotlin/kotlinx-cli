@@ -9,7 +9,9 @@ import kotlin.reflect.KProperty
 internal data class CLIEntityWrapper(var entity: CLIEntity<*>? = null)
 
 /**
- * Base interface for all possible types of entities with default anf required values.
+ * Base interface for all possible types of entities with default and required values.
+ * Provides limitations for API that is accessible for different options/arguments types.
+ * Allows to save the reason why option/argument can(or can't) be omitted in command line.
  *
  * @see [SingleOption], [MultipleOption], [SingleArgument], [MultipleArgument].
  */

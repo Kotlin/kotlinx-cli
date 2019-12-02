@@ -6,6 +6,8 @@ package kotlinx.cli
 
 /**
  * Base interface for all possible types of options with multiple values.
+ * Provides limitations for API that is accessible for options with several values.
+ * Allows to save the way of providing several values in command line.
  *
  * @see [MultipleOption]
  */

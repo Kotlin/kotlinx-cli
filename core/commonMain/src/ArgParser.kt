@@ -55,12 +55,9 @@ interface ArgumentValueDelegate<T> {
 
     /** Provides the value for the delegated property getter. Returns the [value] property. */
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T = value
-    /** Sets the [value] to the [ArgumentValueDelegate.value] property from the delegated property setter. */
+    /** Sets the [value] to the [ArgumentValueDelegate.value] property from the delegated property setter.
+     * This operation is possible only after command line arguments were parsed with [ArgParser.parse] */
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        check((this as ParsingValue<*, *>).valueOrigin != ArgParser.ValueOrigin.UNDEFINED) {
-            "Resetting value of option/argument is only possible after parsing command line arguments." +
-                    " ArgParser.parse(...) method should be called before"
-        }
         this.value = value
     }
 }
@@ -83,6 +80,9 @@ abstract class Subcommand(val name: String): ArgParser(name) {
  * @property commandName name of command which was called.
  */
 class ArgParserResult(val commandName: String)
+
+@Deprecated("OPTION_PREFIX_STYLE is deprecated. Please, use OptionPrefixStyle.")
+typealias OPTION_PREFIX_STYLE = ArgParser.OptionPrefixStyle
 
 /**
  * Arguments parser.
@@ -222,16 +222,16 @@ open class ArgParser(
         arguments.forEach { (_, currentArgument) ->
             previousArgument?.let { previous ->
                 // Previous argument has default value.
-                if (previous.hasDefaultValue) {
-                    if (!currentArgument.hasDefaultValue && currentArgument.descriptor.required) {
-                        printError("Default value of argument ${previous.descriptor.fullName} will be unused,  " +
+                if (previous.descriptor.defaultValueSet) {
+                    if (!currentArgument.descriptor.defaultValueSet && currentArgument.descriptor.required) {
+                        error("Default value of argument ${previous.descriptor.fullName} will be unused,  " +
                                 "because next argument ${currentArgument.descriptor.fullName} is always required and has no default value.")
                     }
                 }
                 // Previous argument is optional.
                 if (!previous.descriptor.required) {
-                    if (!currentArgument.hasDefaultValue && currentArgument.descriptor.required) {
-                        printError("Argument ${previous.descriptor.fullName} will be always required, " +
+                    if (!currentArgument.descriptor.defaultValueSet && currentArgument.descriptor.required) {
+                        error("Argument ${previous.descriptor.fullName} will be always required, " +
                                 "because next argument ${currentArgument.descriptor.fullName} is always required.")
                     }
                 }
@@ -284,7 +284,7 @@ open class ArgParser(
     fun subcommands(vararg subcommandsList: Subcommand) {
         subcommandsList.forEach {
             if (it.name in subcommands) {
-                printError("Subcommand with name ${it.name} was already defined.")
+                error("Subcommand with name ${it.name} was already defined.")
             }
 
             // Set same settings as main parser.
@@ -383,41 +383,45 @@ open class ArgParser(
             if (skipExtraArguments) {
                 argument(ArgType.String, "").vararg()
             }
-
-            // Map declared options and arguments to maps.
-            declaredOptions.forEachIndexed { index, option ->
-                val value = option.entity?.delegate as ParsingValue<*, *>
-                value.descriptor.fullName?.let {
-                    // Add option.
-                    if (options.containsKey(it)) {
-                        error("Option with full name $it was already added.")
-                    }
-                    with(value.descriptor as OptionDescriptor) {
-                        if (shortName != null && shortNames.containsKey(shortName)) {
-                            error("Option with short name ${shortName} was already added.")
-                        }
-                        shortName?.let {
-                            shortNames[it] = value
-                        }
-                    }
-                    options[it] = value
-
-                } ?: error("Option was added, but unnamed. Added option under №${index + 1}")
-            }
-
-            declaredArguments.forEachIndexed { index, argument ->
-                val value = argument.entity?.delegate as ParsingValue<*, *>
-                value.descriptor.fullName?.let {
-                    // Add option.
-                    if (arguments.containsKey(it)) {
-                        error("Argument with full name $it was already added.")
-                    }
-                    arguments[it] = value
-                } ?: error("Argument was added, but unnamed. Added argument under №${index + 1}")
-            }
-            // Make inspections for arguments.
-            inspectRequiredAndDefaultUsage()
         }
+
+        // Clean options and arguments maps.
+        options.clear()
+        arguments.clear()
+
+        // Map declared options and arguments to maps.
+        declaredOptions.forEachIndexed { index, option ->
+            val value = option.entity?.delegate as ParsingValue<*, *>
+            value.descriptor.fullName?.let {
+                // Add option.
+                if (options.containsKey(it)) {
+                    error("Option with full name $it was already added.")
+                }
+                with(value.descriptor as OptionDescriptor) {
+                    if (shortName != null && shortNames.containsKey(shortName)) {
+                        error("Option with short name ${shortName} was already added.")
+                    }
+                    shortName?.let {
+                        shortNames[it] = value
+                    }
+                }
+                options[it] = value
+
+            } ?: error("Option was added, but unnamed. Added option under №${index + 1}")
+        }
+
+        declaredArguments.forEachIndexed { index, argument ->
+            val value = argument.entity?.delegate as ParsingValue<*, *>
+            value.descriptor.fullName?.let {
+                // Add option.
+                if (arguments.containsKey(it)) {
+                    error("Argument with full name $it was already added.")
+                }
+                arguments[it] = value
+            } ?: error("Argument was added, but unnamed. Added argument under №${index + 1}")
+        }
+        // Make inspections for arguments.
+        inspectRequiredAndDefaultUsage()
 
         listOf(arguments, options).forEach {
             it.forEach { (_, value) ->
@@ -486,7 +490,7 @@ open class ArgParser(
                     value.addDefaultValue()
                 }
                 if (value.valueOrigin != ValueOrigin.SET_BY_USER && value.descriptor.required) {
-                    error("Value for ${value.descriptor.textDescription} should be always provided in command line.")
+                    printError("Value for ${value.descriptor.textDescription} should be always provided in command line.")
                 }
             }
         } catch (exception: ParsingException) {
