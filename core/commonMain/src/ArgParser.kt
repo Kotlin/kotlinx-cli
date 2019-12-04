@@ -81,9 +81,6 @@ abstract class Subcommand(val name: String): ArgParser(name) {
  */
 class ArgParserResult(val commandName: String)
 
-@Deprecated("OPTION_PREFIX_STYLE is deprecated. Please, use OptionPrefixStyle.")
-typealias OPTION_PREFIX_STYLE = ArgParser.OptionPrefixStyle
-
 /**
  * Arguments parser.
  *
@@ -175,6 +172,10 @@ open class ArgParser(
         /* JVM style: both full and short names are prefixed with one hyphen "-". */
         JVM,
     }
+
+    @Deprecated("OPTION_PREFIX_STYLE is deprecated. Please, use OptionPrefixStyle.")
+    @Suppress("TOPLEVEL_TYPEALIASES_ONLY")
+    typealias OPTION_PREFIX_STYLE = OptionPrefixStyle
 
     /**
      * Declares a named option and returns an object which can be used to access the option value
