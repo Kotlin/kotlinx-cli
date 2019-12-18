@@ -96,7 +96,8 @@ open class ArgParser(
     var useDefaultHelpShortName: Boolean = true,
     var prefixStyle: OPTION_PREFIX_STYLE = OPTION_PREFIX_STYLE.LINUX,
     var skipExtraArguments: Boolean = false,
-    var hiddenOptionsHelpFlag: String = "help-hidden"
+    var hiddenOptionsHelpFlag: String = "help-hidden",
+    var hiddenOptionsHelpMessage: String = "Display help for hidden options"
 ) {
 
     /**
@@ -370,7 +371,7 @@ open class ArgParser(
         val helpOption = SingleNullableOption(helpDescriptor, CLIEntityWrapper())
         helpOption.owner.entity = helpOption
         declaredOptions.add(helpOption.owner)
-        option(ArgType.Boolean, hiddenOptionsHelpFlag, description = "Display help for hidden options")
+        option(ArgType.Boolean, hiddenOptionsHelpFlag, description = hiddenOptionsHelpMessage)
 
         // Add default list with arguments if there can be extra free arguments.
         if (skipExtraArguments) {
