@@ -95,7 +95,9 @@ open class ArgParser(
     val programName: String,
     var useDefaultHelpShortName: Boolean = true,
     var prefixStyle: OPTION_PREFIX_STYLE = OPTION_PREFIX_STYLE.LINUX,
-    var skipExtraArguments: Boolean = false
+    var skipExtraArguments: Boolean = false,
+    var hiddenOptionsHelpFlag: String = "help-hidden",
+    var hiddenOptionsHelpMessage: String = "Display help for hidden options"
 ) {
 
     /**
@@ -197,10 +199,11 @@ open class ArgParser(
         fullName: String? = null,
         shortName: String ? = null,
         description: String? = null,
-        deprecatedWarning: String? = null
+        deprecatedWarning: String? = null,
+        hidden: Boolean = false
     ): SingleNullableOption<T> {
         val option = SingleNullableOption(OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix, type,
-                fullName, shortName, description, deprecatedWarning = deprecatedWarning), CLIEntityWrapper())
+                fullName, shortName, description, deprecatedWarning = deprecatedWarning, hidden = hidden), CLIEntityWrapper())
         option.owner.entity = option
         declaredOptions.add(option.owner)
         return option
@@ -368,6 +371,7 @@ open class ArgParser(
         val helpOption = SingleNullableOption(helpDescriptor, CLIEntityWrapper())
         helpOption.owner.entity = helpOption
         declaredOptions.add(helpOption.owner)
+        option(ArgType.Boolean, hiddenOptionsHelpFlag, description = hiddenOptionsHelpMessage)
 
         // Add default list with arguments if there can be extra free arguments.
         if (skipExtraArguments) {
@@ -441,8 +445,8 @@ open class ArgParser(
                             }
                         } else {
                             // Boolean flags.
-                            if (argValue.descriptor.fullName == "help") {
-                                println(makeUsage())
+                            if (argValue.descriptor.fullName == "help" || argValue.descriptor.fullName == hiddenOptionsHelpFlag) {
+                                println(makeUsage(argValue.descriptor.fullName == hiddenOptionsHelpFlag))
                                 exitProcess(0)
                             }
                             saveAsOption(argValue, "true")
@@ -478,19 +482,26 @@ open class ArgParser(
     /**
      * Creates a message with the usage information.
      */
-    internal fun makeUsage(): String {
+    internal fun makeUsage(showHidden: Boolean = false): String {
         val result = StringBuilder()
         result.append("Usage: ${fullCommandName.joinToString(" ")} options_list\n")
-        if (arguments.isNotEmpty()) {
-            result.append("Arguments: \n")
-            arguments.forEach {
-                result.append(it.value.descriptor.helpMessage)
+        if (!showHidden) {
+            val shownArguments = arguments.values.sortedBy { it.descriptor.fullName }
+            if (shownArguments.isNotEmpty()) {
+                result.append("Arguments: \n")
+                shownArguments.forEach {
+                    result.append(it.descriptor.helpMessage)
+                }
             }
         }
-        if (options.isNotEmpty()) {
-            result.append("Options: \n")
-            options.forEach {
-                result.append(it.value.descriptor.helpMessage)
+        val shownOptions = options.values.filter { (it.descriptor as OptionDescriptor<*, *>)
+            .let { if (showHidden) it.hidden else !it.hidden }
+        }.sortedBy { it.descriptor.fullName }
+        val optionsHeader = if (showHidden) "Hidden options: \n" else "Options: \n"
+        if (shownOptions.isNotEmpty()) {
+            result.append(optionsHeader)
+            shownOptions.forEach {
+                result.append(it.descriptor.helpMessage)
             }
         }
         return result.toString()
