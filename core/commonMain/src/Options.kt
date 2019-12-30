@@ -162,6 +162,7 @@ fun <T : Any> SingleNullableOption<T>.default(value: T): SingleOption<T, Default
  * for it in command line string.
  *
  * @param value the default value, must be a non-empty collection.
+ * @throws IllegalArgumentException if provided default value is empty collection.
  */
 fun <T : Any, OptionType : MultipleOptionType>
         MultipleOption<T, OptionType, DefaultRequiredType.None>.default(value: Collection<T>):
@@ -224,7 +225,7 @@ fun <T : Any, OptionType : MultipleOptionType>
  *
  * @param delimiterValue delimiter used to separate string value to option values list.
  */
-fun <T : Any, TResult, DefaultRequired: DefaultRequiredType> AbstractSingleOption<T, TResult, DefaultRequired>.delimiter(
+fun <T : Any, DefaultRequired: DefaultRequiredType> AbstractSingleOption<T, *, DefaultRequired>.delimiter(
     delimiterValue: String):
         MultipleOption<T, MultipleOptionType.Delimited, DefaultRequired> {
     val newOption = with((delegate as ParsingValue<T, T>).descriptor as OptionDescriptor) {

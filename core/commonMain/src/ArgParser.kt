@@ -56,7 +56,9 @@ interface ArgumentValueDelegate<T> {
     /** Provides the value for the delegated property getter. Returns the [value] property. */
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T = value
     /** Sets the [value] to the [ArgumentValueDelegate.value] property from the delegated property setter.
-     * This operation is possible only after command line arguments were parsed with [ArgParser.parse] */
+     * This operation is possible only after command line arguments were parsed with [ArgParser.parse]
+     * @throws IllegalStateException in case of resetting value before command line arguments are parsed.
+     */
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         this.value = value
     }
@@ -361,29 +363,29 @@ open class ArgParser(
      *
      * @return an [ArgParserResult] if all arguments were parsed successfully.
      * Otherwise, prints the usage information and terminates the program execution.
+     * @throws IllegalStateException in case of attempt of calling parsing several times.
      */
     fun parse(args: Array<String>): ArgParserResult = parse(args.asList())
 
     protected fun parse(args: List<String>): ArgParserResult {
-        parsingState ?: run {
-            // Add help option.
-            val helpDescriptor = if (useDefaultHelpShortName) OptionDescriptor<Boolean, Boolean>(
-                optionFullFormPrefix,
-                optionShortFromPrefix, ArgType.Boolean,
-                "help", "h", "Usage info"
-            )
-            else OptionDescriptor(
-                optionFullFormPrefix, optionShortFromPrefix,
-                ArgType.Boolean, "help", description = "Usage info"
-            )
-            val helpOption = SingleNullableOption(helpDescriptor, CLIEntityWrapper())
-            helpOption.owner.entity = helpOption
-            declaredOptions.add(helpOption.owner)
+        check(parsingState == null) { "Parsing of command line options can be called only once." }
+        // Add help option.
+        val helpDescriptor = if (useDefaultHelpShortName) OptionDescriptor<Boolean, Boolean>(
+            optionFullFormPrefix,
+            optionShortFromPrefix, ArgType.Boolean,
+            "help", "h", "Usage info"
+        )
+        else OptionDescriptor(
+            optionFullFormPrefix, optionShortFromPrefix,
+            ArgType.Boolean, "help", description = "Usage info"
+        )
+        val helpOption = SingleNullableOption(helpDescriptor, CLIEntityWrapper())
+        helpOption.owner.entity = helpOption
+        declaredOptions.add(helpOption.owner)
 
-            // Add default list with arguments if there can be extra free arguments.
-            if (skipExtraArguments) {
-                argument(ArgType.String, "").vararg()
-            }
+        // Add default list with arguments if there can be extra free arguments.
+        if (skipExtraArguments) {
+            argument(ArgType.String, "").vararg()
         }
 
         // Clean options and arguments maps.

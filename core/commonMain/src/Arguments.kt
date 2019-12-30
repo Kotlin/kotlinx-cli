@@ -69,6 +69,8 @@ abstract class CLIEntity<TResult> internal constructor(val delegate: ArgumentVal
      * This operator makes it possible to delegate a property to this instance. It returns [delegate] object
      * to be used as an actual delegate and uses the name of the delegated property to initialize the full name
      * of the option/argument if it wasn't done during construction of that option/argument.
+     *
+     * @throws IllegalStateException in case of trying to use same delegate several times.
      */
     operator fun provideDelegate(thisRef: Any?, prop: KProperty<*>): ArgumentValueDelegate<TResult> {
         check(!delegateProvided) {
@@ -151,6 +153,8 @@ class MultipleArgument<T : Any, DefaultRequired: DefaultRequiredType> internal c
  * Allows the argument to have several values specified in command line string.
  *
  * @param number the exact number of values expected for this argument, but at least 2.
+ *
+ * @throws IllegalArgumentException if number of values expected for this argument less than 2.
  */
 fun <T : Any, TResult, DefaultRequired: DefaultRequiredType>
         AbstractSingleArgument<T, TResult, DefaultRequired>.multiple(number: Int): MultipleArgument<T, DefaultRequired> {
