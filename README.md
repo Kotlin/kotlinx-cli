@@ -2,7 +2,7 @@
 
 [![JetBrains incubator project](https://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
-> TODO download link
+[![Download](https://api.bintray.com/packages/kotlin/kotlin-dev/kotlinx.cli/images/download.svg)](https://bintray.com/kotlin/kotlin-dev/kotlinx.cli/_latestVersion)
 
 Pure Kotlin implementation of a generic command-line parser.
 
