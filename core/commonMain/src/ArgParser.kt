@@ -175,7 +175,8 @@ open class ArgParser(
         JVM,
     }
 
-    @Deprecated("OPTION_PREFIX_STYLE is deprecated. Please, use OptionPrefixStyle.")
+    @Deprecated("OPTION_PREFIX_STYLE is deprecated. Please, use OptionPrefixStyle.",
+        ReplaceWith("OptionPrefixStyle", "kotlinx.cli.OptionPrefixStyle"))
     @Suppress("TOPLEVEL_TYPEALIASES_ONLY")
     typealias OPTION_PREFIX_STYLE = OptionPrefixStyle
 
