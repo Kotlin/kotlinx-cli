@@ -53,8 +53,11 @@ interface ArgumentValueDelegate<T> {
      */
     var value: T
 
-    /** Provides the value for the delegated property getter. Returns the [value] property. */
+    /** Provides the value for the delegated property getter. Returns the [value] property.
+     * @throws IllegalStateException in case of accessing the value before [ArgParser.parse] method is called.
+     */
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T = value
+
     /** Sets the [value] to the [ArgumentValueDelegate.value] property from the delegated property setter.
      * This operation is possible only after command line arguments were parsed with [ArgParser.parse]
      * @throws IllegalStateException in case of resetting value before command line arguments are parsed.
