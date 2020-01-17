@@ -11,7 +11,7 @@ package kotlinx.cli
  * @property fullName option/argument full name.
  * @property description text description of option/argument.
  * @property defaultValue default value for option/argument.
- * @property required if option/argument is required or not. If it's required and not provided in command line and have no default value, error will be generated.
+ * @property required if option/argument is required or not. If it's required and not provided in command line, error will be generated.
  * @property deprecatedWarning text message with information in case if option is deprecated.
  */
 internal abstract class Descriptor<T : Any, TResult>(val type: ArgType<T>,
@@ -62,7 +62,7 @@ internal abstract class Descriptor<T : Any, TResult>(val type: ArgType<T>,
  * @property shortName option short name.
  * @property description text description of option.
  * @property defaultValue default value for option.
- * @property required if option is required or not. If it's required and not provided in command line and have no default value, error will be generated.
+ * @property required if option is required or not. If it's required and not provided in command line, error will be generated.
  * @property multiple if option can be repeated several times in command line with different values. All values are stored.
  * @property delimiter delimiter that separate option provided as one string to several values.
  * @property deprecatedWarning text message with information in case if option is deprecated.

@@ -51,13 +51,17 @@ interface ArgumentValueDelegate<T> {
      *
      * @see CLIEntity.value
      */
-    // TODO: decide on the exception type
-    // TODO: decide whether 'set' is possible before calling 'parse'
     var value: T
 
-    /** Provides the value for the delegated property getter. Returns the [value] property. */
+    /** Provides the value for the delegated property getter. Returns the [value] property.
+     * @throws IllegalStateException in case of accessing the value before [ArgParser.parse] method is called.
+     */
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T = value
-    /** Sets the [value] to the [ArgumentValueDelegate.value] property from the delegated property setter. */
+
+    /** Sets the [value] to the [ArgumentValueDelegate.value] property from the delegated property setter.
+     * This operation is possible only after command line arguments were parsed with [ArgParser.parse]
+     * @throws IllegalStateException in case of resetting value before command line arguments are parsed.
+     */
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         this.value = value
     }
@@ -94,7 +98,7 @@ class ArgParserResult(val commandName: String)
 open class ArgParser(
     val programName: String,
     var useDefaultHelpShortName: Boolean = true,
-    var prefixStyle: OPTION_PREFIX_STYLE = OPTION_PREFIX_STYLE.LINUX,
+    var prefixStyle: OptionPrefixStyle = OptionPrefixStyle.LINUX,
     var skipExtraArguments: Boolean = false
 ) {
 
@@ -118,6 +122,11 @@ open class ArgParser(
     private val declaredArguments = mutableListOf<CLIEntityWrapper>()
 
     /**
+     * State of parser. Stores last parsing result or null.
+     */
+    private var parsingState: ArgParserResult? = null
+
+    /**
      * Map of subcommands.
      */
     @UseExperimental(ExperimentalCli::class)
@@ -131,7 +140,7 @@ open class ArgParser(
     /**
      * Used prefix form for full option form.
      */
-    private val optionFullFormPrefix = if (prefixStyle == OPTION_PREFIX_STYLE.LINUX) "--" else "-"
+    private val optionFullFormPrefix = if (prefixStyle == OptionPrefixStyle.LINUX) "--" else "-"
 
     /**
      * Used prefix form for short option form.
@@ -151,23 +160,28 @@ open class ArgParser(
         SET_BY_USER,
         /* The value was missing in command line, therefore the default value was used. */
         SET_DEFAULT_VALUE,
-        /* The value is not yet initialized. */
-        // TODO: Do we need to distinguish the cases of not yet set and missing optional?
+        /* The value is not initialized by command line values or  by default values. */
         UNSET,
         /* The value was redefined after parsing manually (usually with the property setter). */
         REDEFINED,
+        /* The value is undefined, because parsing wasn't called. */
+        UNDEFINED
     }
 
     /**
      * The style of option prefixing.
      */
-    // TODO: make enum name pascal-cased
-    enum class OPTION_PREFIX_STYLE {
+    enum class OptionPrefixStyle {
         /* Linux style: the full name of an option is prefixed with two hyphens "--" and the short name — with one "-". */
         LINUX,
         /* JVM style: both full and short names are prefixed with one hyphen "-". */
         JVM,
     }
+
+    @Deprecated("OPTION_PREFIX_STYLE is deprecated. Please, use OptionPrefixStyle.",
+        ReplaceWith("OptionPrefixStyle", "kotlinx.cli.OptionPrefixStyle"))
+    @Suppress("TOPLEVEL_TYPEALIASES_ONLY")
+    typealias OPTION_PREFIX_STYLE = OptionPrefixStyle
 
     /**
      * Declares a named option and returns an object which can be used to access the option value
@@ -213,23 +227,23 @@ open class ArgParser(
     private fun inspectRequiredAndDefaultUsage() {
         var previousArgument: ParsingValue<*, *>? = null
         arguments.forEach { (_, currentArgument) ->
-            // TODO: 'let' body never executes
-            previousArgument?.let {
+            previousArgument?.let { previous ->
                 // Previous argument has default value.
-                it.descriptor.defaultValue?.let {
-                    if (currentArgument.descriptor.defaultValue == null && currentArgument.descriptor.required) {
-                        printError("Default value of argument ${previousArgument.descriptor.fullName} will be unused,  " +
+                if (previous.descriptor.defaultValueSet) {
+                    if (!currentArgument.descriptor.defaultValueSet && currentArgument.descriptor.required) {
+                        error("Default value of argument ${previous.descriptor.fullName} will be unused,  " +
                                 "because next argument ${currentArgument.descriptor.fullName} is always required and has no default value.")
                     }
                 }
                 // Previous argument is optional.
-                if (!it.descriptor.required) {
-                    if (currentArgument.descriptor.defaultValue == null && currentArgument.descriptor.required) {
-                        printError("Argument ${previousArgument.descriptor.fullName} will be always required, " +
+                if (!previous.descriptor.required) {
+                    if (!currentArgument.descriptor.defaultValueSet && currentArgument.descriptor.required) {
+                        error("Argument ${previous.descriptor.fullName} will be always required, " +
                                 "because next argument ${currentArgument.descriptor.fullName} is always required.")
                     }
                 }
             }
+            previousArgument = currentArgument
         }
     }
 
@@ -260,8 +274,8 @@ open class ArgParser(
         fullName: String? = null,
         description: String? = null,
         deprecatedWarning: String? = null
-    ) : SingleArgument<T> {
-        val argument = SingleArgument(ArgDescriptor(type, fullName, 1,
+    ) : SingleArgument<T, DefaultRequiredType.Required> {
+        val argument = SingleArgument<T, DefaultRequiredType.Required>(ArgDescriptor(type, fullName, 1,
                 description, deprecatedWarning = deprecatedWarning), CLIEntityWrapper())
         argument.owner.entity = argument
         declaredArguments.add(argument.owner)
@@ -277,7 +291,7 @@ open class ArgParser(
     fun subcommands(vararg subcommandsList: Subcommand) {
         subcommandsList.forEach {
             if (it.name in subcommands) {
-                printError("Subcommand with name ${it.name} was already defined.")
+                error("Subcommand with name ${it.name} was already defined.")
             }
 
             // Set same settings as main parser.
@@ -295,8 +309,7 @@ open class ArgParser(
      *
      * @param message error message.
      */
-    // TODO: Should it be non-public?
-    fun printError(message: String): Nothing {
+    private fun printError(message: String): Nothing {
         error("$message\n${makeUsage()}")
     }
 
@@ -354,17 +367,22 @@ open class ArgParser(
      *
      * @return an [ArgParserResult] if all arguments were parsed successfully.
      * Otherwise, prints the usage information and terminates the program execution.
+     * @throws IllegalStateException in case of attempt of calling parsing several times.
      */
     fun parse(args: Array<String>): ArgParserResult = parse(args.asList())
 
     protected fun parse(args: List<String>): ArgParserResult {
-        // TODO: here we finalize parser setup, but what if 'parse' is called multiple times?
+        check(parsingState == null) { "Parsing of command line options can be called only once." }
         // Add help option.
-        val helpDescriptor = if (useDefaultHelpShortName) OptionDescriptor<Boolean, Boolean>(optionFullFormPrefix,
-                optionShortFromPrefix, ArgType.Boolean,
-                "help", "h", "Usage info")
-            else OptionDescriptor(optionFullFormPrefix, optionShortFromPrefix,
-                ArgType.Boolean, "help", description = "Usage info")
+        val helpDescriptor = if (useDefaultHelpShortName) OptionDescriptor<Boolean, Boolean>(
+            optionFullFormPrefix,
+            optionShortFromPrefix, ArgType.Boolean,
+            "help", "h", "Usage info"
+        )
+        else OptionDescriptor(
+            optionFullFormPrefix, optionShortFromPrefix,
+            ArgType.Boolean, "help", description = "Usage info"
+        )
         val helpOption = SingleNullableOption(helpDescriptor, CLIEntityWrapper())
         helpOption.owner.entity = helpOption
         declaredOptions.add(helpOption.owner)
@@ -373,6 +391,10 @@ open class ArgParser(
         if (skipExtraArguments) {
             argument(ArgType.String, "").vararg()
         }
+
+        // Clean options and arguments maps.
+        options.clear()
+        arguments.clear()
 
         // Map declared options and arguments to maps.
         declaredOptions.forEachIndexed { index, option ->
@@ -408,6 +430,12 @@ open class ArgParser(
         // Make inspections for arguments.
         inspectRequiredAndDefaultUsage()
 
+        listOf(arguments, options).forEach {
+            it.forEach { (_, value) ->
+                value.valueOrigin = ValueOrigin.UNSET
+            }
+        }
+
         val argumentsQueue = ArgumentsQueue(arguments.map { it.value.descriptor as ArgDescriptor<*, *> })
 
         var index = 0
@@ -421,8 +449,9 @@ open class ArgParser(
                         // Use parser for this subcommand.
                         subcommand.parse(args.slice(index + 1..args.size - 1))
                         subcommand.execute()
+                        parsingState = ArgParserResult(name)
 
-                        return ArgParserResult(name)
+                        return parsingState!!
                     }
                 }
                 // Parse arguments from command line.
@@ -467,12 +496,15 @@ open class ArgParser(
                 if (value.isEmpty()) {
                     value.addDefaultValue()
                 }
+                if (value.valueOrigin != ValueOrigin.SET_BY_USER && value.descriptor.required) {
+                    printError("Value for ${value.descriptor.textDescription} should be always provided in command line.")
+                }
             }
         } catch (exception: ParsingException) {
             printError(exception.message!!)
         }
-
-        return ArgParserResult(programName)
+        parsingState = ArgParserResult(programName)
+        return parsingState!!
     }
 
     /**
