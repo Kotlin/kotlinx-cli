@@ -26,7 +26,7 @@ kotlin {
     }
 }
 ```
-###!!! Important information
+### !!! Important information
 If `kotlinx.cli` is added to gradle project as dependency endorsed libraries in Kotlin/Native must be turned off! 
 
 ## Command line entities
