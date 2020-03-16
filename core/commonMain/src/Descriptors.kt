@@ -5,6 +5,74 @@
 package kotlinx.cli
 
 /**
+ * Wrapper for default value.
+ */
+abstract class DefaultValue<T> {
+    abstract val value: T
+    abstract val helpMessage: String
+
+    /**
+     * Provide text description of value.
+     *
+     * @param value value got getting text description for.
+     */
+    fun valueDescription(value: T) =
+        if (value is List<*> && value.isNotEmpty())
+            " [${value.joinToString()}]"
+        else if (value !is List<*>)
+            " [$value]"
+        else ""
+
+    abstract fun toMultiple(): DefaultValue<List<T>>
+}
+
+/**
+ * Simple default value which just wrap value of any argument type.
+ */
+internal class SimpleDefaultValue<T>(private val simpleValue: T) : DefaultValue<T>() {
+    override val value: T
+        get() = simpleValue
+    override val helpMessage: String
+        get() = valueDescription(value)
+
+    override fun toMultiple(): DefaultValue<List<T>> = SimpleDefaultValue(listOf(value))
+}
+
+/**
+ * Default value pattern which allows to use create default value
+ * based on values of other command line options/arguments.
+ */
+class DefaultValuePattern<T>(val cliEntities: List<CLIEntity<T>>,
+                             val expression: (values: List<T>) -> T,
+                             val helpMessageGenerator: (values: List<String>) -> String) :
+        DefaultValue<T>() {
+
+    init {
+        cliEntities.forEach {
+            with((it.delegate as ParsingValue<*, *>).descriptor) {
+                require(defaultValue != null || required) {
+                    "It's possible to use only arguments/options which always have values."
+                }
+            }
+        }
+    }
+
+    override val value: T by lazy {
+        expression(cliEntities.map { it.value })
+    }
+
+    override val helpMessage: String
+        get() = " [${helpMessageGenerator(cliEntities.
+            map { "\${${(it.delegate as ParsingValue<*, *>).descriptor.fullName!!}}" })}]"
+
+    override fun toMultiple(): DefaultValuePattern<List<T>> {
+        // For custom generator it's impossible to convert value to another type.
+        error("Conversion to multiple default values is unknown in case " +
+                "of provided by user pattern for default value.")
+    }
+}
+
+/**
  * Common descriptor both for options and positional arguments.
  *
  * @property type option/argument type, one of [ArgType].
@@ -17,7 +85,7 @@ package kotlinx.cli
 internal abstract class Descriptor<T : Any, TResult>(val type: ArgType<T>,
                                                      var fullName: String? = null,
                                                      val description: String? = null,
-                                                     val defaultValue: TResult? = null,
+                                                     val defaultValue: DefaultValue<TResult>? = null,
                                                      val required: Boolean = false,
                                                      val deprecatedWarning: String? = null) {
     /**
@@ -28,19 +96,6 @@ internal abstract class Descriptor<T : Any, TResult>(val type: ArgType<T>,
      * Help message for descriptor.
      */
     abstract val helpMessage: String
-
-    /**
-     * Provide text description of value.
-     *
-     * @param value value got getting text description for.
-     */
-    fun valueDescription(value: TResult?) = value?.let {
-        if (it is List<*> && it.isNotEmpty())
-            " [${it.joinToString()}]"
-        else if (it !is List<*>)
-            " [$it]"
-        else null
-    }
 
     /**
      * Flag to check if descriptor has set default value for option/argument.
@@ -74,7 +129,7 @@ internal class OptionDescriptor<T : Any, TResult>(
         fullName: String? = null,
         val shortName: String ? = null,
         description: String? = null,
-        defaultValue: TResult? = null,
+        defaultValue: DefaultValue<TResult>? = null,
         required: Boolean = false,
         val multiple: Boolean = false,
         val delimiter: String? = null,
@@ -89,7 +144,7 @@ internal class OptionDescriptor<T : Any, TResult>(
             val result = StringBuilder()
             result.append("    $optionFullFormPrefix$fullName")
             shortName?.let { result.append(", $optionShortFromPrefix$it") }
-            valueDescription(defaultValue)?.let {
+            defaultValue?.helpMessage?.let {
                 result.append(it)
             }
             description?.let {result.append(" -> $it")}
@@ -119,7 +174,7 @@ internal class ArgDescriptor<T : Any, TResult>(
         fullName: String?,
         val number: Int? = null,
         description: String? = null,
-        defaultValue: TResult? = null,
+        defaultValue: DefaultValue<TResult>? = null,
         required: Boolean = true,
         deprecatedWarning: String? = null) : Descriptor<T, TResult>(type, fullName, description, defaultValue,
         required, deprecatedWarning) {
@@ -139,7 +194,7 @@ internal class ArgDescriptor<T : Any, TResult>(
         get() {
             val result = StringBuilder()
             result.append("    ${fullName}")
-            valueDescription(defaultValue)?.let {
+            defaultValue?.helpMessage?.let {
                 result.append(it)
             }
             description?.let { result.append(" -> $it") }
