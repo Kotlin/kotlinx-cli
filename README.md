@@ -32,7 +32,7 @@ repositories {
 }
 ```
 
-In multiplatform projects add the following dependency to the common source set:
+In Kotlin projects add the following dependency to the needed source set (it may be common or platform specific source set):
 
 ```groovy
 kotlin {
@@ -44,12 +44,6 @@ kotlin {
         }
     }
 }
-```
-
-To use the library in a JVM-only project add the platform to the artifact name, e.g.:
-
-```groovy
-implementation("org.jetbrains.kotlinx:kotlinx-cli-jvm:0.2.1")
 ```
 
 `kotlinx.cli` is also included in Kotlin/Native distribution as endorsed library so it's possible to use `kotlinx.cli`
