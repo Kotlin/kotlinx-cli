@@ -16,6 +16,42 @@ Program defines what arguments are expected.
 `kotlinx.cli` will figure out how to parse those, reporting errors if the program arguments are invalid,
 and also generate help and usage messages as well.
 
+## Using in your projects
+
+> Note that the library is experimental and the API is subject to change.
+
+The library is published to [kotlinx](https://bintray.com/kotlin/kotlinx/kotlinx.cli) bintray repository.
+
+### Gradle
+
+Add the bintray repository:
+
+```groovy
+repositories {
+    maven { url "https://kotlin.bintray.com/kotlinx" }
+}
+```
+
+In multiplatform projects add the following dependency to the common source set:
+
+```groovy
+kotlin {
+    sourceSets {
+        commonMain {
+             dependencies {
+                 implementation("org.jetbrains.kotlinx:kotlinx-cli:0.2.1")
+             }
+        }
+    }
+}
+```
+
+To use the library in a JVM-only project add the platform to the artifact name, e.g.:
+
+```groovy
+implementation("org.jetbrains.kotlinx:kotlinx-cli-jvm:0.2.1")
+```
+
 `kotlinx.cli` is also included in Kotlin/Native distribution as endorsed library so it's possible to use `kotlinx.cli`
 in projects on Kotlin/Native without setting dependency to it. 
 If `Gradle` is used to build project turning on endorsed libraries in Kotlin/Native is possible with
