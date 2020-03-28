@@ -75,7 +75,7 @@ internal abstract class ParsingValue<T: Any, TResult: Any>(val descriptor: Descr
      */
     fun addDefaultValue() {
         if (descriptor.defaultValueSet) {
-            parsedValue = descriptor.defaultValue!!
+            parsedValue = descriptor.defaultValue!!.value
             valueOrigin = ArgParser.ValueOrigin.SET_DEFAULT_VALUE
         }
     }

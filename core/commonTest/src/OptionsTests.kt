@@ -65,6 +65,23 @@ class OptionsTests {
     }
 
     @Test
+    fun testDefaultValuePattern() {
+        val argParser = ArgParser("testParser")
+        val useShortForm by argParser.option(ArgType.Boolean, "short", "s",
+                "Show short version of report").default(false)
+        val renders by argParser.option(ArgType.Choice(listOf("text", "html", "xml", "json")),
+                "renders", "r", "Renders for showing information").multiple().default(listOf("text"))
+        val output = argParser.option(ArgType.String, "output", "o", "Output file")
+                .default("output.txt")
+        val outputLog by argParser.option(ArgType.String, "log", "l", "Output log file")
+                .default(DefaultValuePattern(listOf(output), { values ->  "${values[0]}.log"},
+                        { values -> "${values[0]}.log" } ))
+        argParser.parse(arrayOf("-o", "out.txt"))
+        assertEquals("out.txt.log", outputLog)
+        assertEquals("text", renders[0])
+    }
+
+    @Test
     fun testResetOptionsValues() {
         val argParser = ArgParser("testParser")
         val useShortFormOption = argParser.option(ArgType.Boolean, "short", "s", "Show short version of report").default(false)

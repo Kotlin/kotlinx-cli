@@ -107,7 +107,7 @@ fun <T : Any, TResult, DefaultType: DefaultRequiredType> AbstractSingleOption<T,
         MultipleOption<T, MultipleOptionType.Repeated, DefaultType>(
             OptionDescriptor(
                 optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, listOfNotNull(defaultValue),
+                description, defaultValue?.toMultiple() ?: SimpleDefaultValue(emptyList()),
                 required, true, delimiter, deprecatedWarning
             ), owner
         )
@@ -129,9 +129,22 @@ fun <T : Any, DefaultType: DefaultRequiredType> MultipleOption<T, MultipleOption
         MultipleOption<T, MultipleOptionType.RepeatedDelimited, DefaultRequiredType>(
             OptionDescriptor(
                 optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, defaultValue?.toList() ?: listOf(),
+                description, defaultValue ?: SimpleDefaultValue(listOf()),
                 required, true, delimiter, deprecatedWarning
             ), owner
+        )
+    }
+    owner.entity = newOption
+    return newOption
+}
+
+internal fun <T : Any> SingleNullableOption<T>.toOptionWithDefault(value: DefaultValue<T>): SingleOption<T, DefaultRequiredType.Default> {
+    val newOption = with((delegate as ParsingValue<T, T>).descriptor as OptionDescriptor) {
+        SingleOption<T, DefaultRequiredType.Default>(
+                OptionDescriptor(
+                        optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
+                        description, value, required, multiple, delimiter, deprecatedWarning
+                ), owner
         )
     }
     owner.entity = newOption
@@ -144,18 +157,17 @@ fun <T : Any, DefaultType: DefaultRequiredType> MultipleOption<T, MultipleOption
  *
  * @param value the default value.
  */
-fun <T : Any> SingleNullableOption<T>.default(value: T): SingleOption<T, DefaultRequiredType.Default> {
-    val newOption = with((delegate as ParsingValue<T, T>).descriptor as OptionDescriptor) {
-        SingleOption<T, DefaultRequiredType.Default>(
-            OptionDescriptor(
-                optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, value, required, multiple, delimiter, deprecatedWarning
-            ), owner
-        )
-    }
-    owner.entity = newOption
-    return newOption
-}
+fun <T : Any> SingleNullableOption<T>.default(value: T): SingleOption<T, DefaultRequiredType.Default> =
+        toOptionWithDefault(SimpleDefaultValue(value))
+
+/**
+ * Specifies the default value for the option, that will be used when no value is provided for it
+ * in command line string.
+ *
+ * @param value the default value.
+ */
+fun <T : Any> SingleNullableOption<T>.default(value: DefaultValuePattern<T>):
+        SingleOption<T, DefaultRequiredType.Default> = toOptionWithDefault(value)
 
 /**
  * Specifies the default value for the option with multiple values, that will be used when no values are provided
@@ -172,7 +184,7 @@ fun <T : Any, OptionType : MultipleOptionType>
         MultipleOption<T, OptionType, DefaultRequiredType.Default>(
             OptionDescriptor(
                 optionFullFormPrefix, optionShortFromPrefix, type, fullName,
-                shortName, description, value.toList(),
+                shortName, description, SimpleDefaultValue(value.toList()),
                 required, multiple, delimiter, deprecatedWarning
             ), owner
         )
@@ -208,7 +220,7 @@ fun <T : Any, OptionType : MultipleOptionType>
         MultipleOption<T, OptionType, DefaultRequiredType.Required>(
             OptionDescriptor(
                 optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, defaultValue?.toList() ?: listOf(),
+                description, defaultValue ?: SimpleDefaultValue(listOf()),
                 true, multiple, delimiter, deprecatedWarning
             ), owner
         )
@@ -232,7 +244,7 @@ fun <T : Any, DefaultRequired: DefaultRequiredType> AbstractSingleOption<T, *, D
         MultipleOption<T, MultipleOptionType.Delimited, DefaultRequired>(
             OptionDescriptor(
                 optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, listOfNotNull(defaultValue),
+                description, defaultValue?.toMultiple() ?: SimpleDefaultValue(emptyList()),
                 required, multiple, delimiterValue, deprecatedWarning
             ), owner
         )
@@ -256,7 +268,7 @@ fun <T : Any, DefaultRequired: DefaultRequiredType> MultipleOption<T, MultipleOp
         MultipleOption<T, MultipleOptionType.RepeatedDelimited, DefaultRequired>(
             OptionDescriptor(
                 optionFullFormPrefix, optionShortFromPrefix, type, fullName, shortName,
-                description, defaultValue?.toList() ?: listOf(),
+                description, defaultValue ?: SimpleDefaultValue(listOf()),
                 required, multiple, delimiterValue, deprecatedWarning
             ), owner
         )
