@@ -46,7 +46,7 @@ internal abstract class Descriptor<T : Any, TResult>(val type: ArgType<T>,
      * Flag to check if descriptor has set default value for option/argument.
      */
     val defaultValueSet by lazy {
-        defaultValue != null && (defaultValue is List<*> && defaultValue.isNotEmpty() || defaultValue !is List<*>)
+        defaultValue != null
     }
 }
 
