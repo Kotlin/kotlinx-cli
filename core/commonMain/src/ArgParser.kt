@@ -161,6 +161,21 @@ open class ArgParser(
     protected var treatAsOption = true
 
     /**
+     * Arguments which should be parsed with subcommands.
+     */
+    val subcommandsArguments = mutableListOf<String>()
+
+    /**
+     * Options which should be parsed with subcommands.
+     */
+    val subcommandsOptions = mutableListOf<String>()
+
+    /**
+     * Subcommand used in commmand line arguments.
+     */
+    var usedSubcommand: Subcommand? = null
+
+    /**
      * The way an option/argument has got its value.
      */
     enum class ValueOrigin {
@@ -359,7 +374,9 @@ open class ArgParser(
      */
     private fun treatAsArgument(arg: String, argumentsQueue: ArgumentsQueue) {
         if (!saveAsArg(arg, argumentsQueue)) {
-            printError("Too many arguments! Couldn't process argument $arg!")
+            usedSubcommand?.let {
+                (if (treatAsOption) subcommandsOptions else subcommandsArguments).add(arg)
+            } ?: printError("Too many arguments! Couldn't process argument $arg!")
         }
     }
 
@@ -416,9 +433,10 @@ open class ArgParser(
      *
      * @param argValue argument value with all information about option.
      */
-    private fun saveOptionWithoutParameter(argValue: ParsingValue<*, *>) {
+    internal fun saveOptionWithoutParameter(argValue: ParsingValue<*, *>) {
         // Boolean flags.
         if (argValue.descriptor.fullName == "help") {
+            usedSubcommand?.saveOptionWithoutParameter(argValue)
             println(makeUsage())
             exitProcess(0)
         }
@@ -569,6 +587,9 @@ open class ArgParser(
         }
 
         val argumentsQueue = ArgumentsQueue(arguments.map { it.value.descriptor as ArgDescriptor<*, *> })
+        usedSubcommand = null
+        subcommandsOptions.clear()
+        subcommandsArguments.clear()
 
         val argIterator = args.listIterator()
         try {
@@ -576,36 +597,33 @@ open class ArgParser(
                 val arg = argIterator.next()
                 // Check for subcommands.
                 @OptIn(ExperimentalCli::class)
-                subcommands.forEach { (name, subcommand) ->
-                    if (arg == name) {
-                        // Use parser for this subcommand.
-                        subcommand.parse(args.slice(argIterator.nextIndex() until args.size))
-                        subcommand.execute()
-                        parsingState = ArgParserResult(name)
-
-                        return parsingState!!
-                    }
-                }
-                // Parse arguments from command line.
-                if (treatAsOption && arg.startsWith('-')) {
-                    // Candidate in being option.
-                    // Option is found.
-                    if (!(recognizeAndSaveOptionShortForm(arg, argIterator) ||
-                                recognizeAndSaveOptionFullForm(arg, argIterator))) {
-                        // State is changed so next options are arguments.
-                        if (!treatAsOption) {
-                            // Argument is found.
-                            treatAsArgument(argIterator.next(), argumentsQueue)
-                        } else {
-                            // Try save as argument.
-                            if (!saveAsArg(arg, argumentsQueue)) {
-                                printError("Unknown option $arg")
+                if (arg !in subcommands) {
+                    // Parse arguments from command line.
+                    if (treatAsOption && arg.startsWith('-')) {
+                        // Candidate in being option.
+                        // Option is found.
+                        if (!(recognizeAndSaveOptionShortForm(arg, argIterator) ||
+                                    recognizeAndSaveOptionFullForm(arg, argIterator))
+                        ) {
+                            // State is changed so next options are arguments.
+                            if (!treatAsOption) {
+                                // Argument is found.
+                                treatAsArgument(argIterator.next(), argumentsQueue)
+                            } else {
+                                usedSubcommand?.let { subcommandsOptions.add(arg) } ?: run {
+                                    // Try save as argument.
+                                    if (!saveAsArg(arg, argumentsQueue)) {
+                                        printError("Unknown option $arg")
+                                    }
+                                }
                             }
                         }
+                    } else {
+                        // Argument is found.
+                        treatAsArgument(arg, argumentsQueue)
                     }
                 } else {
-                    // Argument is found.
-                    treatAsArgument(arg, argumentsQueue)
+                    usedSubcommand = subcommands[arg]
                 }
             }
             // Postprocess results of parsing.
@@ -617,6 +635,14 @@ open class ArgParser(
                 if (value.valueOrigin != ValueOrigin.SET_BY_USER && value.descriptor.required) {
                     printError("Value for ${value.descriptor.textDescription} should be always provided in command line.")
                 }
+            }
+            // Parse arguments for subcommand.
+            usedSubcommand?.let {
+                it.parse(subcommandsOptions + (if (treatAsOption) emptyList() else listOf("--")) + subcommandsArguments)
+                it.execute()
+                parsingState = ArgParserResult(it.name)
+
+                return parsingState!!
             }
         } catch (exception: ParsingException) {
             printError(exception.message!!)
