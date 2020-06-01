@@ -143,7 +143,7 @@ If application has rich command line interface and executes different actions wi
  subcommands can be useful.
  
 ```kotlin
-@file:UseExperimental(ExperimentalCli::class)
+@file:OptIn(ExperimentalCli::class)
 
 import kotlinx.cli.*
 

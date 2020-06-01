@@ -113,7 +113,7 @@ class SubcommandsTests {
 
             override fun execute() {
                 result = addendums.sum()
-                result = if (invert!!) -1 * result else result
+                result = if (invert) -1 * result else result
                 println("result is: $result and will output to $output")
             }
         }

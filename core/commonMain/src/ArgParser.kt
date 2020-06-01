@@ -596,7 +596,6 @@ open class ArgParser(
             while (argIterator.hasNext()) {
                 val arg = argIterator.next()
                 // Check for subcommands.
-                @OptIn(ExperimentalCli::class)
                 if (arg !in subcommands) {
                     // Parse arguments from command line.
                     if (treatAsOption && arg.startsWith('-')) {
