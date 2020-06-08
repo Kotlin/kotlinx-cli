@@ -5,8 +5,6 @@
 
 package kotlinx.cli
 
-import kotlinx.cli.ArgParser
-import kotlinx.cli.ArgType
 import kotlin.test.*
 
 class ErrorTests {
@@ -52,5 +50,16 @@ class ErrorTests {
             argParser.parse(arrayOf("-r", "xml"))
         }
         assertTrue("Option renders is expected to be one of [text, html]. xml is provided." in exception.message!!)
+    }
+
+    @Test
+    fun testWrongEnumChoice() {
+        val argParser = ArgParser("testParser")
+        val sources by argParser.option(ArgType.EnumChoice<DataSourceEnum>(),
+                "sources", "s", "Data sources").multiple().default(listOf(DataSourceEnum.PRODUCTION))
+        val exception = assertFailsWith<IllegalStateException> {
+            argParser.parse(arrayOf("-s", "debug"))
+        }
+        assertTrue("Option sources is expected to be one of [local, staging, production]. debug is provided." in exception.message!!)
     }
 }

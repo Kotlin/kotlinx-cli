@@ -81,6 +81,42 @@ abstract class ArgType<T : Any>(val hasParameter: kotlin.Boolean) {
             if (value in values) value
             else throw ParsingException("Option $name is expected to be one of $values. $value is provided.")
     }
+
+    companion object {
+        /**
+         * Helper for arguments that have limited set of possible values represented as enumeration constants.
+         */
+        inline fun <reified T: Enum<T>> EnumChoice(): EnumArgChoiceImpl<T>
+        {
+            return EnumArgChoiceImpl(enumValues())
+        }
+    }
+
+    class EnumArgChoiceImpl<T: Enum<T>>(choices: Array<T>): ArgType<T>(true)
+    {
+        private val choicesMap: Map<kotlin.String, T> = choices.associateBy { it.toString() }
+
+        init {
+            require(choicesMap.size == choices.size) {
+                "Command line representations of enum choices are not distinct"
+            }
+        }
+
+        override val description: kotlin.String
+            get() {
+                return "{ Value should be one of ${choicesMap.keys} }"
+            }
+
+        override fun convert(value: kotlin.String, name: kotlin.String): T {
+            val ret = choicesMap[value]
+            if (ret == null) {
+                throw ParsingException("Option $name is expected to be one of ${choicesMap.keys}. $value is provided.")
+            } else {
+                return ret
+            }
+        }
+
+    }
 }
 
 internal class ParsingException(message: String) : Exception(message)

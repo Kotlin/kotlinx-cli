@@ -5,11 +5,6 @@
 @file:UseExperimental(ExperimentalCli::class)
 package kotlinx.cli
 
-import kotlinx.cli.ArgParser
-import kotlinx.cli.ArgType
-import kotlinx.cli.ExperimentalCli
-import kotlinx.cli.Subcommand
-import kotlin.math.exp
 import kotlin.test.*
 
 class HelpTests {
@@ -25,6 +20,8 @@ class HelpTests {
                 "Show short version of report").default(false)
         val renders by argParser.option(ArgType.Choice(listOf("text", "html", "teamcity", "statistics", "metrics")),
                 shortName = "r", description = "Renders for showing information").multiple().default(listOf("text"))
+        val sources by argParser.option(ArgType.EnumChoice<DataSourceEnum>(),
+                "sources", "ds", "Data sources").multiple().default(listOf(DataSourceEnum.PRODUCTION))
         val user by argParser.option(ArgType.String, shortName = "u", description = "User access information for authorization")
         argParser.parse(arrayOf("main.txt"))
         val helpOutput = argParser.makeUsage().trimIndent()
@@ -40,6 +37,7 @@ Options:
     --eps, -e [$epsDefault] -> Meaningful performance changes { Double }
     --short, -s [false] -> Show short version of report 
     --renders, -r [text] -> Renders for showing information { Value should be one of [text, html, teamcity, statistics, metrics] }
+    --sources, -ds [production] -> Data sources { Value should be one of [local, staging, production] }
     --user, -u -> User access information for authorization { String }
     --help, -h -> Usage info 
         """.trimIndent()
@@ -66,6 +64,12 @@ Options:
             val codesizeSamples by option(ArgType.String, "codesize-samples",
                     description = "Samples used for code size metric (value 'all' allows use all samples)").delimiter(",")
             val codesizeNormalize by option(ArgType.String, "codesize-normalize",
+                    description = "File with golden results which should be used for normalization")
+            val source by option(ArgType.EnumChoice<DataSourceEnum>(),
+                    description = "Data source").default(DataSourceEnum.PRODUCTION)
+            val sourceSamples by option(ArgType.String, "source-samples",
+                    description = "Samples used for code size metric (value 'all' allows use all samples)").delimiter(",")
+            val sourceNormalize by option(ArgType.String, "source-normalize",
                     description = "File with golden results which should be used for normalization")
             val user by option(ArgType.String, shortName = "u", description = "User access information for authorization")
             val mainReport by argument(ArgType.String, description = "Main report for analysis")
@@ -94,6 +98,9 @@ Options:
     --codesize [geomean] -> Code size way of calculation { Value should be one of [samples, geomean] }
     --codesize-samples -> Samples used for code size metric (value 'all' allows use all samples) { String }
     --codesize-normalize -> File with golden results which should be used for normalization { String }
+    --source [production] -> Data source { Value should be one of [local, staging, production] }
+    --source-samples -> Samples used for code size metric (value 'all' allows use all samples) { String }
+    --source-normalize -> File with golden results which should be used for normalization { String }
     --user, -u -> User access information for authorization { String }
     --help, -h -> Usage info 
 """.trimIndent()
