@@ -106,14 +106,9 @@ abstract class ArgType<T : Any>(val hasParameter: kotlin.Boolean) {
                 return "{ Value should be one of ${choicesMap.keys} }"
             }
 
-        override fun convert(value: kotlin.String, name: kotlin.String): T {
-            val ret = choicesMap[value]
-            if (ret == null) {
+        override fun convert(value: kotlin.String, name: kotlin.String) =
+            choicesMap[value] ?:
                 throw ParsingException("Option $name is expected to be one of ${choicesMap.keys}. $value is provided.")
-            } else {
-                return ret
-            }
-        }
 
     }
 }
