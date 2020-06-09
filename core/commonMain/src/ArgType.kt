@@ -86,8 +86,7 @@ abstract class ArgType<T : Any>(val hasParameter: kotlin.Boolean) {
         /**
          * Helper for arguments that have limited set of possible values represented as enumeration constants.
          */
-        inline fun <reified T: Enum<T>> EnumChoice(): EnumArgChoiceImpl<T>
-        {
+        inline fun <reified T: Enum<T>> EnumChoice(): EnumArgChoiceImpl<T> {
             return EnumArgChoiceImpl(enumValues())
         }
     }
