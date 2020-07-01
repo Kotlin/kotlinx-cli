@@ -1,4 +1,4 @@
-# kotlinx.cli
+# kotlinx-cli
 
 [![JetBrains incubator project](https://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
@@ -10,10 +10,10 @@ Pure Kotlin implementation of a generic command-line parser.
 * Platform-agnostic: core library has no platform-specific dependencies and can be used in any Kotlin project 
 * Hackable: build extensions on top of it however you like
 
-`kotlinx.cli` can be used to create user-friendly and flexible command-line interfaces
+`kotlinx-cli` can be used to create user-friendly and flexible command-line interfaces
 for Kotlin/JVM, Kotlin/Native, and any other Kotlin console applications.
 Program defines what arguments are expected.
-`kotlinx.cli` will figure out how to parse those, reporting errors if the program arguments are invalid,
+`kotlinx-cli` will figure out how to parse those, reporting errors if the program arguments are invalid,
 and also generate help and usage messages as well.
 
 ## Using in your projects
@@ -46,7 +46,7 @@ kotlin {
 }
 ```
 
-`kotlinx.cli` is also included in Kotlin/Native distribution as endorsed library so it's possible to use `kotlinx.cli`
+`kotlinx-cli` is also included in Kotlin/Native distribution as endorsed library so it's possible to use `kotlinx.cli`
 in projects on Kotlin/Native without setting dependency to it. 
 If `Gradle` is used to build project turning on endorsed libraries in Kotlin/Native is possible with
 ```kotlin
@@ -57,7 +57,7 @@ kotlin {
 }
 ```
 ### !!! Important information
-If `kotlinx.cli` is added to gradle project as dependency endorsed libraries in Kotlin/Native must be turned off! 
+If `kotlinx-cli` is added to gradle project as dependency endorsed libraries in Kotlin/Native must be turned off! 
 
 ## Command line entities
 There are 2 base entity: option and argument.
