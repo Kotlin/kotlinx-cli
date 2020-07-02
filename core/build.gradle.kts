@@ -1,5 +1,12 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("multiplatform")
+}
+
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions.allWarningsAsErrors = true
 }
 
 kotlin {
