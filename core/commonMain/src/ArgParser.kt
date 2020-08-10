@@ -637,7 +637,7 @@ open class ArgParser(
             }
             // Parse arguments for subcommand.
             usedSubcommand?.let {
-                it.parse(subcommandsOptions + listOfNotNull("--".takeUnless(treatAsOption)) + subcommandsArguments)
+                it.parse(subcommandsOptions + listOfNotNull("--".takeUnless { treatAsOption }) + subcommandsArguments)
                 it.execute()
                 parsingState = ArgParserResult(it.name)
 
