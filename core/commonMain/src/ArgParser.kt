@@ -163,17 +163,17 @@ open class ArgParser(
     /**
      * Arguments which should be parsed with subcommands.
      */
-    val subcommandsArguments = mutableListOf<String>()
+    private val subcommandsArguments = mutableListOf<String>()
 
     /**
      * Options which should be parsed with subcommands.
      */
-    val subcommandsOptions = mutableListOf<String>()
+    private val subcommandsOptions = mutableListOf<String>()
 
     /**
      * Subcommand used in commmand line arguments.
      */
-    var usedSubcommand: Subcommand? = null
+    private var usedSubcommand: Subcommand? = null
 
     /**
      * The way an option/argument has got its value.
