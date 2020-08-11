@@ -98,12 +98,20 @@ fun calculate(inputData: String, eps: Double, debug: Boolean = false): List<Doub
     ...
 }
 
+enum class Format {
+    HTML,
+    CSV,
+    PDF
+}
+
 fun main(args: Array<String>) {
     val parser = ArgParser("example")
     val input by parser.option(ArgType.String, shortName = "i", description = "Input file").required()
     val output by parser.option(ArgType.String, shortName = "o", description = "Output file name")
-    val format by parser.option(ArgType.Choice(listOf("html", "csv", "pdf")), shortName = "f", 
-    	description = "Format for output file").default("csv").multiple()
+    val format by parser.option(ArgType.Choice<Format>(), shortName = "f", 
+    	description = "Format for output file").default(Format.CSV).multiple()
+    val stringFormat by parser.option(ArgType.Choice(listOf("html", "csv", "pdf"), { it }), shortName = "sf", 
+        description = "Format as string for output file").default("csv").multiple()
     val debug by parser.option(ArgType.Boolean, shortName = "d", description = "Turn on debug mode").default(false)
     val eps by parser.option(ArgType.Double, description = "Observational error").default(0.01)
 
