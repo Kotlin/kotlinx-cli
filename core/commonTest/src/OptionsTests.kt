@@ -38,21 +38,28 @@ class OptionsTests {
         assertEquals("input.txt", input)
     }
 
+    enum class Renders {
+        TEXT,
+        HTML,
+        XML,
+        JSON
+    }
+
     @Test
     fun testMultipleOptions() {
         val argParser = ArgParser("testParser")
         val useShortForm by argParser.option(ArgType.Boolean, "short", "s", "Show short version of report").default(false)
-        val renders by argParser.option(ArgType.Choice(listOf("text", "html", "xml", "json")),
-                "renders", "r", "Renders for showing information").multiple().default(listOf("text"))
-        val sources by argParser.option(ArgType.EnumChoice<DataSourceEnum>(),
+        val renders by argParser.option(ArgType.Choice<Renders>(),
+                "renders", "r", "Renders for showing information").multiple().default(listOf(Renders.TEXT))
+        val sources by argParser.option(ArgType.Choice<DataSourceEnum>(),
                 "sources", "ds", "Data sources").multiple().default(listOf(DataSourceEnum.PRODUCTION))
         argParser.parse(arrayOf("-s", "-r", "text", "-r", "json", "-ds", "local", "-ds", "production"))
         assertEquals(true, useShortForm)
 
         assertEquals(2, renders.size)
         val (firstRender, secondRender) = renders
-        assertEquals("text", firstRender)
-        assertEquals("json", secondRender)
+        assertEquals(Renders.TEXT, firstRender)
+        assertEquals(Renders.JSON, secondRender)
 
         assertEquals(2, sources.size)
         val (firstSource, secondSource) = sources
@@ -64,14 +71,14 @@ class OptionsTests {
     fun testDefaultOptions() {
         val argParser = ArgParser("testParser")
         val useShortForm by argParser.option(ArgType.Boolean, "short", "s", "Show short version of report").default(false)
-        val renders by argParser.option(ArgType.Choice(listOf("text", "html", "xml", "json")),
-                "renders", "r", "Renders for showing information").multiple().default(listOf("text"))
-        val sources by argParser.option(ArgType.EnumChoice<DataSourceEnum>(),
+        val renders by argParser.option(ArgType.Choice<Renders>(),
+                "renders", "r", "Renders for showing information").multiple().default(listOf(Renders.TEXT))
+        val sources by argParser.option(ArgType.Choice<DataSourceEnum>(),
                 "sources", "ds", "Data sources").multiple().default(listOf(DataSourceEnum.PRODUCTION))
         val output by argParser.option(ArgType.String, "output", "o", "Output file")
         argParser.parse(arrayOf("-o", "out.txt"))
         assertEquals(false, useShortForm)
-        assertEquals("text", renders[0])
+        assertEquals(Renders.TEXT, renders[0])
         assertEquals(DataSourceEnum.PRODUCTION, sources[0])
     }
 
@@ -80,10 +87,10 @@ class OptionsTests {
         val argParser = ArgParser("testParser")
         val useShortFormOption = argParser.option(ArgType.Boolean, "short", "s", "Show short version of report").default(false)
         var useShortForm by useShortFormOption
-        val rendersOption = argParser.option(ArgType.Choice(listOf("text", "html", "xml", "json")),
-                "renders", "r", "Renders for showing information").multiple().default(listOf("text"))
+        val rendersOption = argParser.option(ArgType.Choice<Renders>(),
+                "renders", "r", "Renders for showing information").multiple().default(listOf(Renders.TEXT))
         var renders by rendersOption
-        val sourcesOption = argParser.option(ArgType.EnumChoice<DataSourceEnum>(),
+        val sourcesOption = argParser.option(ArgType.Choice<DataSourceEnum>(),
                 "sources", "ds", "Data sources").multiple().default(listOf(DataSourceEnum.PRODUCTION))
         var sources by sourcesOption
         val outputOption = argParser.option(ArgType.String, "output", "o", "Output file")

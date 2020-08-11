@@ -40,12 +40,17 @@ class ErrorTests {
         assertTrue("Option number is expected to be integer number. out.txt is provided." in exception.message!!)
     }
 
+    enum class RenderEnum {
+        TEXT,
+        HTML;
+    }
+
     @Test
     fun testWrongChoice() {
         val argParser = ArgParser("testParser")
         val useShortForm by argParser.option(ArgType.Boolean, "short", "s", "Show short version of report").default(false)
-        val renders by argParser.option(ArgType.Choice(listOf("text", "html")),
-                "renders", "r", "Renders for showing information").multiple().default(listOf("text"))
+        val renders by argParser.option(ArgType.Choice<RenderEnum>(),
+                "renders", "r", "Renders for showing information").multiple().default(listOf(RenderEnum.TEXT))
         val exception = assertFailsWith<IllegalStateException> {
             argParser.parse(arrayOf("-r", "xml"))
         }
@@ -55,7 +60,7 @@ class ErrorTests {
     @Test
     fun testWrongEnumChoice() {
         val argParser = ArgParser("testParser")
-        val sources by argParser.option(ArgType.EnumChoice<DataSourceEnum>(),
+        val sources by argParser.option(ArgType.Choice<DataSourceEnum>(),
                 "sources", "s", "Data sources").multiple().default(listOf(DataSourceEnum.PRODUCTION))
         val exception = assertFailsWith<IllegalStateException> {
             argParser.parse(arrayOf("-s", "debug"))
