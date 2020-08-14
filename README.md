@@ -39,7 +39,7 @@ kotlin {
     sourceSets {
         commonMain {
              dependencies {
-                 implementation("org.jetbrains.kotlinx:kotlinx-cli:0.2.1")
+                 implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3")
              }
         }
     }
