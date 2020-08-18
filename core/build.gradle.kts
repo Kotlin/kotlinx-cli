@@ -17,6 +17,7 @@ kotlin {
     }
 
     js {
+        moduleName = "${rootProject.name}-${project.name}"
         nodejs {
         }
         compilations.all {
