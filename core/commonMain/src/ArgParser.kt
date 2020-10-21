@@ -143,12 +143,12 @@ open class ArgParser(
     /**
      * Used prefix form for full option form.
      */
-    private val optionFullFormPrefix = if (prefixStyle == OptionPrefixStyle.JVM) "-" else "--"
+    protected val optionFullFormPrefix = if (prefixStyle == OptionPrefixStyle.JVM) "-" else "--"
 
     /**
      * Used prefix form for short option form.
      */
-    private val optionShortFromPrefix = "-"
+    protected val optionShortFromPrefix = "-"
 
     /**
      * Name with all commands that should be executed.
@@ -436,7 +436,9 @@ open class ArgParser(
     internal fun saveOptionWithoutParameter(argValue: ParsingValue<*, *>) {
         // Boolean flags.
         if (argValue.descriptor.fullName == "help") {
-            usedSubcommand?.saveOptionWithoutParameter(argValue)
+            usedSubcommand?.let {
+                parse(listOf("${it.optionFullFormPrefix}${argValue.descriptor.fullName}"))
+            }
             println(makeUsage())
             exitProcess(0)
         }
