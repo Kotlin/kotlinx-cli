@@ -437,7 +437,7 @@ open class ArgParser(
         // Boolean flags.
         if (argValue.descriptor.fullName == "help") {
             usedSubcommand?.let {
-                parse(listOf("${it.optionFullFormPrefix}${argValue.descriptor.fullName}"))
+                it.parse(listOf("${it.optionFullFormPrefix}${argValue.descriptor.fullName}"))
             }
             println(makeUsage())
             exitProcess(0)
