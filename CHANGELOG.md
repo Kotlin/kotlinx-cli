@@ -1,3 +1,7 @@
+## 0.3.1 ##
+
+* Fix to get full help information for subcommands ([GH-44](https://github.com/Kotlin/kotlinx-cli/pull/44))
+
 ## 0.3 ##
 Library version compatible with Kotlin 1.4.0
 
