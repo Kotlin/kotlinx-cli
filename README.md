@@ -56,9 +56,32 @@ kotlin {
     }
 }
 ```
+
 ### !!! Important information
 If `kotlinx-cli` is added to gradle project as dependency endorsed libraries in Kotlin/Native must be turned off! 
+### Maven
 
+Add the bintray repository:
+
+```xml
+<repositories>
+    <repository>
+        <id>kotlinx</id>
+        <name>kotlinx</name>
+        <url>https://kotlin.bintray.com/kotlinx/</url>
+    </repository>
+</repositories>
+```
+
+In Kotlin projects add the following dependency to the dependencies:
+
+```xml
+<dependency>
+    <groupId>org.jetbrains.kotlinx</groupId>
+    <artifactId>kotlinx-cli-jvm</artifactId>
+    <version>0.3.1</version>
+</dependency>
+```
 ## Command line entities
 There are 2 base entity: option and argument.
 
