@@ -102,7 +102,8 @@ open class ArgParser(
     val programName: String,
     var useDefaultHelpShortName: Boolean = true,
     var prefixStyle: OptionPrefixStyle = OptionPrefixStyle.LINUX,
-    var skipExtraArguments: Boolean = false
+    var skipExtraArguments: Boolean = false,
+    val strictSubcommandOptionsOrder:Boolean = false
 ) {
 
     /**
@@ -625,6 +626,13 @@ open class ArgParser(
                     }
                 } else {
                     usedSubcommand = subcommands[arg]
+                    if (strictSubcommandOptionsOrder) {
+                        return usedSubcommand!!.run {
+                            parse(args.slice(argIterator.nextIndex() until args.size))
+                            execute()
+                            ArgParserResult(name)
+                        }
+                    }
                 }
             }
             // Postprocess results of parsing.
