@@ -103,7 +103,7 @@ open class ArgParser(
     var useDefaultHelpShortName: Boolean = true,
     var prefixStyle: OptionPrefixStyle = OptionPrefixStyle.LINUX,
     var skipExtraArguments: Boolean = false,
-    val strictSubcommandOptionsOrder: Boolean = false
+    var strictSubcommandOptionsOrder: Boolean = false
 ) {
 
     /**
@@ -333,6 +333,7 @@ open class ArgParser(
             // Set same settings as main parser.
             it.prefixStyle = prefixStyle
             it.useDefaultHelpShortName = useDefaultHelpShortName
+            it.strictSubcommandOptionsOrder = strictSubcommandOptionsOrder
             fullCommandName.forEachIndexed { index, namePart ->
                 it.fullCommandName.add(index, namePart)
             }
