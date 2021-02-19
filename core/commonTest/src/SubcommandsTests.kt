@@ -12,6 +12,7 @@ class SubcommandsTests {
     fun testSubcommand() {
         val argParser = ArgParser("testParser")
         val output by argParser.option(ArgType.String, "output", "o", "Output file")
+        val defaultOption by argParser.option(ArgType.String, "format", "f", "Output format").default("CSV")
         class Summary: Subcommand("summary", "Calculate summary") {
             val invert by option(ArgType.Boolean, "invert", "i", "Invert results")
             val addendums by argument(ArgType.Int, "addendums", description = "Addendums").vararg()
@@ -26,6 +27,7 @@ class SubcommandsTests {
         argParser.subcommands(action)
         argParser.parse(arrayOf("summary", "-o", "out.txt", "-i", "2", "3", "5"))
         assertEquals("out.txt", output)
+        assertEquals("CSV", defaultOption)
         assertEquals(-10, action.result)
     }
 
@@ -49,10 +51,12 @@ class SubcommandsTests {
         }
         val argParserStrict = ArgParser("testParser", strictSubcommandOptionsOrder = true)
         val action = Summary()
-        val outputValis by argParserStrict.option(ArgType.String, "output", "o", "Output file")
+        val outputValid by argParserStrict.option(ArgType.String, "output", "o", "Output file")
+        val defaultOption by argParserStrict.option(ArgType.String, "format", "f", "Output format").default("CSV")
         argParserStrict.subcommands(action)
         argParserStrict.parse(arrayOf("-o", "out.txt", "summary", "-i", "2", "3", "5"))
-        assertEquals("out.txt", outputValis)
+        assertEquals("out.txt", outputValid)
+        assertEquals("CSV", defaultOption)
         assertEquals(-10, action.result)
     }
 

@@ -228,7 +228,7 @@ Options:
     --help, -h -> Usage info
 ```
     
-The boolean property `strictSubcommandOptionsOrder` defines the allowed order of options for subcommands. 
+The boolean property `strictSubcommandOptionsOrder` defines the allowed order of options and arguments for subcommands. 
 When it false (default), then the main program's options can be specified everywhere, even after the subcommand. 
 Otherwise, parameters can only be specified after the subcommands where they are defined. For example
 
@@ -238,7 +238,7 @@ Otherwise, parameters can only be specified after the subcommands where they are
 import kotlinx.cli.*
 
 fun main(args: Array<String>) {
-	val parser = ArgParser("example", strictSubcommandOptionsOrder = true)
+    val parser = ArgParser("example", strictSubcommandOptionsOrder = true)
     val output by parser.option(ArgType.String, "output", "o", "Output file")
 
     class Multiply: Subcommand("mul", "Multiply") {
@@ -249,7 +249,6 @@ fun main(args: Array<String>) {
             result = numbers.reduce{ acc, it -> acc * it }
         }
     }
-    val summary = Summary()
     val multiple = Multiply()
     parser.subcommands(summary, multiple)
 

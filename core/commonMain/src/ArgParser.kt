@@ -103,7 +103,7 @@ open class ArgParser(
     var useDefaultHelpShortName: Boolean = true,
     var prefixStyle: OptionPrefixStyle = OptionPrefixStyle.LINUX,
     var skipExtraArguments: Boolean = false,
-    val strictSubcommandOptionsOrder:Boolean = false
+    val strictSubcommandOptionsOrder: Boolean = false
 ) {
 
     /**
@@ -627,11 +627,7 @@ open class ArgParser(
                 } else {
                     usedSubcommand = subcommands[arg]
                     if (strictSubcommandOptionsOrder) {
-                        return usedSubcommand!!.run {
-                            parse(args.slice(argIterator.nextIndex() until args.size))
-                            execute()
-                            ArgParserResult(name)
-                        }
+                        break
                     }
                 }
             }
@@ -647,7 +643,11 @@ open class ArgParser(
             }
             // Parse arguments for subcommand.
             usedSubcommand?.let {
-                it.parse(subcommandsOptions + listOfNotNull("--".takeUnless { treatAsOption }) + subcommandsArguments)
+                if (strictSubcommandOptionsOrder) {
+                    it.parse(args.slice(argIterator.nextIndex() until args.size))
+                } else {
+                    it.parse(subcommandsOptions + listOfNotNull("--".takeUnless { treatAsOption }) + subcommandsArguments)
+                }
                 it.execute()
                 parsingState = ArgParserResult(it.name)
 
