@@ -229,8 +229,8 @@ Options:
 ```
     
 The boolean property `strictSubcommandOptionsOrder` defines the allowed order of options and arguments for subcommands. 
-When it false (default), then the main program's options can be specified everywhere, even after the subcommand. 
-Otherwise, parameters can only be specified after the subcommands where they are defined. For example
+When it is `false` (default), then the main program's options can be specified everywhere, even after the subcommand.
+Otherwise, parameters can only be specified after the subcommands where they are defined. For example,
 
 ```kotlin
 @file:OptIn(ExperimentalCli::class)
