@@ -5,10 +5,6 @@
 @file:OptIn(ExperimentalCli::class)
 package kotlinx.cli
 
-import kotlinx.cli.ArgParser
-import kotlinx.cli.ArgType
-import kotlinx.cli.ExperimentalCli
-import kotlinx.cli.Subcommand
 import kotlin.test.*
 
 class SubcommandsTests {
@@ -16,6 +12,7 @@ class SubcommandsTests {
     fun testSubcommand() {
         val argParser = ArgParser("testParser")
         val output by argParser.option(ArgType.String, "output", "o", "Output file")
+        val defaultOption by argParser.option(ArgType.String, "format", "f", "Output format").default("CSV")
         class Summary: Subcommand("summary", "Calculate summary") {
             val invert by option(ArgType.Boolean, "invert", "i", "Invert results")
             val addendums by argument(ArgType.Int, "addendums", description = "Addendums").vararg()
@@ -30,6 +27,36 @@ class SubcommandsTests {
         argParser.subcommands(action)
         argParser.parse(arrayOf("summary", "-o", "out.txt", "-i", "2", "3", "5"))
         assertEquals("out.txt", output)
+        assertEquals("CSV", defaultOption)
+        assertEquals(-10, action.result)
+    }
+
+    @Test
+    fun testStrictSubcommandOptionsOrder() {
+        val argParserStrictFail = ArgParser("testParser", strictSubcommandOptionsOrder = true)
+        argParserStrictFail.option(ArgType.String, "output", "o", "Output file")
+        class Summary: Subcommand("summary", "Calculate summary") {
+            val invert by option(ArgType.Boolean, "invert", "i", "Invert results")
+            val addendums by argument(ArgType.Int, "addendums", description = "Addendums").vararg()
+            var result: Int = 0
+
+            override fun execute() {
+                result = addendums.sum()
+                result = if (invert!!) -1 * result else result
+            }
+        }
+        argParserStrictFail.subcommands(Summary())
+        assertFailsWith(IllegalStateException::class) {
+            argParserStrictFail.parse(arrayOf("summary", "-i", "2", "3", "5", "-o", "out.txt"))
+        }
+        val argParserStrict = ArgParser("testParser", strictSubcommandOptionsOrder = true)
+        val action = Summary()
+        val outputValid by argParserStrict.option(ArgType.String, "output", "o", "Output file")
+        val defaultOption by argParserStrict.option(ArgType.String, "format", "f", "Output format").default("CSV")
+        argParserStrict.subcommands(action)
+        argParserStrict.parse(arrayOf("-o", "out.txt", "summary", "-i", "2", "3", "5"))
+        assertEquals("out.txt", outputValid)
+        assertEquals("CSV", defaultOption)
         assertEquals(-10, action.result)
     }
 

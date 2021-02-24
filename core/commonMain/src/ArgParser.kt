@@ -102,7 +102,8 @@ open class ArgParser(
     val programName: String,
     var useDefaultHelpShortName: Boolean = true,
     var prefixStyle: OptionPrefixStyle = OptionPrefixStyle.LINUX,
-    var skipExtraArguments: Boolean = false
+    var skipExtraArguments: Boolean = false,
+    var strictSubcommandOptionsOrder: Boolean = false
 ) {
 
     /**
@@ -332,6 +333,7 @@ open class ArgParser(
             // Set same settings as main parser.
             it.prefixStyle = prefixStyle
             it.useDefaultHelpShortName = useDefaultHelpShortName
+            it.strictSubcommandOptionsOrder = strictSubcommandOptionsOrder
             fullCommandName.forEachIndexed { index, namePart ->
                 it.fullCommandName.add(index, namePart)
             }
@@ -625,6 +627,9 @@ open class ArgParser(
                     }
                 } else {
                     usedSubcommand = subcommands[arg]
+                    if (strictSubcommandOptionsOrder) {
+                        break
+                    }
                 }
             }
             // Postprocess results of parsing.
@@ -639,7 +644,11 @@ open class ArgParser(
             }
             // Parse arguments for subcommand.
             usedSubcommand?.let {
-                it.parse(subcommandsOptions + listOfNotNull("--".takeUnless { treatAsOption }) + subcommandsArguments)
+                if (strictSubcommandOptionsOrder) {
+                    it.parse(args.slice(argIterator.nextIndex() until args.size))
+                } else {
+                    it.parse(subcommandsOptions + listOfNotNull("--".takeUnless { treatAsOption }) + subcommandsArguments)
+                }
                 it.execute()
                 parsingState = ArgParserResult(it.name)
 

@@ -227,4 +227,34 @@ Arguments:
 Options: 
     --help, -h -> Usage info
 ```
- 
+    
+The boolean property `strictSubcommandOptionsOrder` defines the allowed order of options and arguments for subcommands. 
+When it is `false` (default), then the main program's options can be specified everywhere, even after the subcommand.
+Otherwise, parameters can only be specified after the subcommands where they are defined. For example,
+
+```kotlin
+@file:OptIn(ExperimentalCli::class)
+
+import kotlinx.cli.*
+
+fun main(args: Array<String>) {
+    val parser = ArgParser("example", strictSubcommandOptionsOrder = true)
+    val output by parser.option(ArgType.String, "output", "o", "Output file")
+
+    class Multiply: Subcommand("mul", "Multiply") {
+        val numbers by argument(ArgType.Int, description = "Addendums").vararg()
+        var result: Int = 0
+
+        override fun execute() {
+            result = numbers.reduce{ acc, it -> acc * it }
+        }
+    }
+    val multiple = Multiply()
+    parser.subcommands(summary, multiple)
+
+    parser.parse(args)
+}
+```
+`example -o out.txt mul 1 2 3 -o out.txt # OK`
+
+`example mul 1 2 3 -o out.txt # fail in this case, but OK if strictSubcommandOptionsOrder is false`
