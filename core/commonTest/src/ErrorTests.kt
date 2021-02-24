@@ -9,6 +9,7 @@ package kotlinx.cli
 
 import kotlin.test.*
 
+@Ignore
 class ErrorTests {
     @Test
     fun testExtraArguments() {

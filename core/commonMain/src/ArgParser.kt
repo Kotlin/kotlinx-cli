@@ -345,7 +345,8 @@ open class ArgParser(
      * @param message error message.
      */
     private fun printError(message: String): Nothing {
-        error("$message\n${makeUsage()}")
+        println("$message\n${makeUsage()}")
+        exitProcess(127)
     }
 
     /**
