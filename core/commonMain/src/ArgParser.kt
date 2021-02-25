@@ -176,6 +176,11 @@ open class ArgParser(
      */
     private var usedSubcommand: Subcommand? = null
 
+    internal var outputAndTerminate: (message: String, exitCode: Int) -> Nothing = { message, exitCode ->
+        println(message)
+        exitProcess(exitCode)
+    }
+
     /**
      * The way an option/argument has got its value.
      */
@@ -347,7 +352,7 @@ open class ArgParser(
      * @param message error message.
      */
     private fun printError(message: String): Nothing {
-        error("$message\n${makeUsage()}")
+        outputAndTerminate("$message\n${makeUsage()}", 127)
     }
 
     /**
@@ -441,8 +446,7 @@ open class ArgParser(
             usedSubcommand?.let {
                 it.parse(listOf("${it.optionFullFormPrefix}${argValue.descriptor.fullName}"))
             }
-            println(makeUsage())
-            exitProcess(0)
+            outputAndTerminate(makeUsage(), 0)
         }
         saveAsOption(argValue, "true")
     }
