@@ -444,8 +444,7 @@ open class ArgParser(
             usedSubcommand?.let {
                 it.parse(listOf("${it.optionFullFormPrefix}${argValue.descriptor.fullName}"))
             }
-            println(makeUsage())
-            exitProcess(0)
+            outputAndTerminate(makeUsage(), 0)
         }
         saveAsOption(argValue, "true")
     }
