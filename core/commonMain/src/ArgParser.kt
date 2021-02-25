@@ -175,6 +175,11 @@ open class ArgParser(
      */
     private var usedSubcommand: Subcommand? = null
 
+    internal var outputAndTerminate: (message: String, exitCode: Int) -> Nothing = { message, exitCode ->
+        println(message)
+        exitProcess(exitCode)
+    }
+
     /**
      * The way an option/argument has got its value.
      */
@@ -345,8 +350,7 @@ open class ArgParser(
      * @param message error message.
      */
     private fun printError(message: String): Nothing {
-        println("$message\n${makeUsage()}")
-        exitProcess(127)
+        outputAndTerminate("$message\n${makeUsage()}", 127)
     }
 
     /**
