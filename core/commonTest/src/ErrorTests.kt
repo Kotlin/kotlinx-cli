@@ -9,9 +9,10 @@ package kotlinx.cli
 
 import kotlin.test.*
 
-class ErrorTests {
 
-    private fun ArgParser.avoidProcessExit() = apply { outputAndTerminate = { message, _ ->  error(message) } }
+internal fun ArgParser.avoidProcessExit() = apply { outputAndTerminate = { message, _ ->  error(message) } }
+
+class ErrorTests {
 
     @Test
     fun testExtraArguments() {

@@ -33,7 +33,7 @@ class SubcommandsTests {
 
     @Test
     fun testStrictSubcommandOptionsOrder() {
-        val argParserStrictFail = ArgParser("testParser", strictSubcommandOptionsOrder = true)
+        val argParserStrictFail = ArgParser("testParser", strictSubcommandOptionsOrder = true).avoidProcessExit()
         argParserStrictFail.option(ArgType.String, "output", "o", "Output file")
         class Summary: Subcommand("summary", "Calculate summary") {
             val invert by option(ArgType.Boolean, "invert", "i", "Invert results")

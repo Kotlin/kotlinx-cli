@@ -342,6 +342,7 @@ open class ArgParser(
             fullCommandName.forEachIndexed { index, namePart ->
                 it.fullCommandName.add(index, namePart)
             }
+            it.outputAndTerminate = outputAndTerminate
             subcommands[it.name] = it
         }
     }
