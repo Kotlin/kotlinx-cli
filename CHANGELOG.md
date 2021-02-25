@@ -1,3 +1,8 @@
+## 0.3.2 ##
+
+* Added option to strict order of subcommands and their parameters([GH-55](https://github.com/Kotlin/kotlinx-cli/pull/55))
+* Removed stack trace from error message with full usage info([GH-58](https://github.com/Kotlin/kotlinx-cli/pull/58))
+
 ## 0.3.1 ##
 
 * Fix to get full help information for subcommands ([GH-44](https://github.com/Kotlin/kotlinx-cli/pull/44))
