@@ -1,7 +1,6 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven(url = "https://dl.bintray.com/kotlin/kotlin-eap")
     }
     val kotlinVersion: String by project
     dependencies {
@@ -40,8 +39,6 @@ infra {
 
 allprojects {
     repositories {
-        maven("https://cache-redirector.jetbrains.com/jcenter")
-        maven("https://dl.bintray.com/kotlin/kotlin-dev")
-        maven("https://dl.bintray.com/kotlin/kotlin-eap")
+        mavenCentral()
     }
 }
