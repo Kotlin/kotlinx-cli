@@ -2,7 +2,7 @@
 
 [![JetBrains incubator project](https://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 [![GitHub license](https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg?style=flat)](https://www.apache.org/licenses/LICENSE-2.0)
-[![Download](https://api.bintray.com/packages/kotlin/kotlinx/kotlinx.cli/images/download.svg)](https://bintray.com/kotlin/kotlinx/kotlinx.cli/_latestVersion)
+[![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx/kotlinx-cli.svg?label=Maven%20Central)](https://search.maven.org/artifact/org.jetbrains.kotlinx/kotlinx-cli)
 
 Pure Kotlin implementation of a generic command-line parser.
 
@@ -20,35 +20,37 @@ and also generate help and usage messages as well.
 
 > Note that the library is experimental and the API is subject to change.
 
-The library is published to [kotlinx](https://bintray.com/kotlin/kotlinx/kotlinx.cli) bintray repository.
+The library is published to Maven Central repository.
 
 ### Gradle
 
-Add the bintray repository:
+- Add the Maven Central repository if it is not already there:
 
-```groovy
+```kotlin
 repositories {
-    maven { url "https://kotlin.bintray.com/kotlinx" }
+    mavenCentral()
 }
 ```
 
-In Kotlin projects add the following dependency to the needed source set (it may be common or platform specific source set):
+In Kotlin multiplatform projects, add the following dependency to a source set (it may be a common or platform specific source set):
 
 ```groovy
 kotlin {
     sourceSets {
         commonMain {
              dependencies {
-                 implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.1")
+                 implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.2")
              }
         }
     }
 }
 ```
 
-`kotlinx-cli` is also included in Kotlin/Native distribution as endorsed library so it's possible to use `kotlinx.cli`
-in projects on Kotlin/Native without setting dependency to it. 
-If `Gradle` is used to build project turning on endorsed libraries in Kotlin/Native is possible with
+`kotlinx-cli` is also included in Kotlin/Native distribution as an endorsed library, so it's possible to use `kotlinx.cli`
+in Kotlin/Native projects without an explicit dependency on it. 
+
+If Gradle is used to build a project, turning on endorsed libraries in Kotlin/Native is possible with
+
 ```kotlin
 kotlin {
     linuxX64("linux") {
@@ -57,29 +59,18 @@ kotlin {
 }
 ```
 
-### !!! Important information
-If `kotlinx-cli` is added to gradle project as dependency endorsed libraries in Kotlin/Native must be turned off! 
+> ### ❗ Important
+> If `kotlinx-cli` is added to a gradle project as an explicit dependency, endorsed libraries in Kotlin/Native must be turned off! 
+
 ### Maven
 
-Add the bintray repository:
-
-```xml
-<repositories>
-    <repository>
-        <id>kotlinx</id>
-        <name>kotlinx</name>
-        <url>https://kotlin.bintray.com/kotlinx/</url>
-    </repository>
-</repositories>
-```
-
-In Kotlin projects add the following dependency to the dependencies:
+In Kotlin projects, add the following dependency to the `dependencies` element of `pom.xml`:
 
 ```xml
 <dependency>
     <groupId>org.jetbrains.kotlinx</groupId>
     <artifactId>kotlinx-cli-jvm</artifactId>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
 </dependency>
 ```
 ## Command line entities
