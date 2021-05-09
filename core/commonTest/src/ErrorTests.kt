@@ -10,13 +10,11 @@ package kotlinx.cli
 import kotlin.test.*
 
 
-internal fun ArgParser.avoidProcessExit() = apply { outputAndTerminate = { message, _ ->  error(message) } }
-
 class ErrorTests {
 
     @Test
     fun testExtraArguments() {
-        val argParser = ArgParser("testParser").avoidProcessExit()
+        val argParser = ArgParserWithoutExit("testParser")
         val addendums by argParser.argument(ArgType.Int, "addendums", description = "Addendums").multiple(2)
         val output by argParser.argument(ArgType.String, "output", "Output file")
         val debugMode by argParser.option(ArgType.Boolean, "debug", "d", "Debug mode")
@@ -27,7 +25,7 @@ class ErrorTests {
 
     @Test
     fun testUnknownOption() {
-        val argParser = ArgParser("testParser").avoidProcessExit()
+        val argParser = ArgParserWithoutExit("testParser")
         val output by argParser.option(ArgType.String, "output", "o", "Output file")
         val input by argParser.option(ArgType.String, "input", "i", "Input file")
         val exception = assertFailsWith<IllegalStateException> {
@@ -38,7 +36,7 @@ class ErrorTests {
 
     @Test
     fun testWrongFormat() {
-        val argParser = ArgParser("testParser").avoidProcessExit()
+        val argParser = ArgParserWithoutExit("testParser")
         val number by argParser.option(ArgType.Int, "number", description = "Integer number")
         val exception = assertFailsWith<IllegalStateException> {
             argParser.parse(arrayOf("--number", "out.txt"))
@@ -53,7 +51,7 @@ class ErrorTests {
 
     @Test
     fun testWrongChoice() {
-        val argParser = ArgParser("testParser").avoidProcessExit()
+        val argParser = ArgParserWithoutExit("testParser")
         val useShortForm by argParser.option(ArgType.Boolean, "short", "s", "Show short version of report").default(false)
         val renders by argParser.option(ArgType.Choice<RenderEnum>(),
                 "renders", "r", "Renders for showing information").multiple().default(listOf(RenderEnum.TEXT))
@@ -65,7 +63,7 @@ class ErrorTests {
 
     @Test
     fun testWrongEnumChoice() {
-        val argParser = ArgParser("testParser").avoidProcessExit()
+        val argParser = ArgParserWithoutExit("testParser")
         val sources by argParser.option(ArgType.Choice<DataSourceEnum>(),
                 "sources", "s", "Data sources").multiple().default(listOf(DataSourceEnum.PRODUCTION))
         val exception = assertFailsWith<IllegalStateException> {

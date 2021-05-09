@@ -12,7 +12,7 @@ import kotlin.test.*
 class OptionsTests {
     @Test
     fun testShortForm() {
-        val argParser = ArgParser("testParser")
+        val argParser = ArgParserWithoutExit("testParser")
         val output by argParser.option(ArgType.String, "output", "o", "Output file")
         val input by argParser.option(ArgType.String, "input", "i", "Input file")
         argParser.parse(arrayOf("-o", "out.txt", "-i", "input.txt"))
@@ -22,7 +22,7 @@ class OptionsTests {
 
     @Test
     fun testFullForm() {
-        val argParser = ArgParser("testParser")
+        val argParser = ArgParserWithoutExit("testParser")
         val output by argParser.option(ArgType.String, shortName = "o", description = "Output file")
         val input by argParser.option(ArgType.String, shortName = "i", description = "Input file")
         argParser.parse(arrayOf("--output", "out.txt", "--input", "input.txt"))
@@ -32,7 +32,7 @@ class OptionsTests {
 
     @Test
     fun testJavaPrefix() {
-        val argParser = ArgParser("testParser", prefixStyle = ArgParser.OptionPrefixStyle.JVM)
+        val argParser = ArgParserWithoutExit("testParser", prefixStyle = ArgParser.OptionPrefixStyle.JVM)
         val output by argParser.option(ArgType.String, "output", "o", "Output file")
         val input by argParser.option(ArgType.String, "input", "i", "Input file")
         argParser.parse(arrayOf("-output", "out.txt", "-i", "input.txt"))
@@ -49,7 +49,7 @@ class OptionsTests {
 
     @Test
     fun testGNUPrefix() {
-        val argParser = ArgParser("testParser", prefixStyle = ArgParser.OptionPrefixStyle.GNU)
+        val argParser = ArgParserWithoutExit("testParser", prefixStyle = ArgParser.OptionPrefixStyle.GNU)
         val output by argParser.option(ArgType.String, "output", "o", "Output file")
         val input by argParser.option(ArgType.String, "input", "i", "Input file")
         val verbose by argParser.option(ArgType.Boolean, "verbose", "v", "Verbose print")
@@ -65,7 +65,7 @@ class OptionsTests {
 
     @Test
     fun testGNUArguments() {
-        val argParser = ArgParser("testParser", prefixStyle = ArgParser.OptionPrefixStyle.GNU)
+        val argParser = ArgParserWithoutExit("testParser", prefixStyle = ArgParser.OptionPrefixStyle.GNU)
         val output by argParser.argument(ArgType.String, "output", "Output file")
         val input by argParser.argument(ArgType.String, "input", "Input file")
         val verbose by argParser.option(ArgType.Boolean, "verbose", "v", "Verbose print")
@@ -81,7 +81,7 @@ class OptionsTests {
 
     @Test
     fun testMultipleOptions() {
-        val argParser = ArgParser("testParser")
+        val argParser = ArgParserWithoutExit("testParser")
         val useShortForm by argParser.option(ArgType.Boolean, "short", "s", "Show short version of report").default(false)
         val renders by argParser.option(ArgType.Choice<Renders>(),
                 "renders", "r", "Renders for showing information").multiple().default(listOf(Renders.TEXT))
@@ -103,7 +103,7 @@ class OptionsTests {
 
     @Test
     fun testDefaultOptions() {
-        val argParser = ArgParser("testParser")
+        val argParser = ArgParserWithoutExit("testParser")
         val useShortForm by argParser.option(ArgType.Boolean, "short", "s", "Show short version of report").default(false)
         val renders by argParser.option(ArgType.Choice<Renders>(),
                 "renders", "r", "Renders for showing information").multiple().default(listOf(Renders.TEXT))
@@ -118,7 +118,7 @@ class OptionsTests {
 
     @Test
     fun testResetOptionsValues() {
-        val argParser = ArgParser("testParser")
+        val argParser = ArgParserWithoutExit("testParser")
         val useShortFormOption = argParser.option(ArgType.Boolean, "short", "s", "Show short version of report").default(false)
         var useShortForm by useShortFormOption
         val rendersOption = argParser.option(ArgType.Choice<Renders>(),
