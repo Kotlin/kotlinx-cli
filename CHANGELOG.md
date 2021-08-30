@@ -1,3 +1,7 @@
+## 0.3.3 ##
+
+* Fix to report correct exit code in case of non-parsable input ([GH-66](https://github.com/Kotlin/kotlinx-cli/pull/66))
+
 ## 0.3.2 ##
 
 * Added option to strict order of subcommands and their parameters([GH-55](https://github.com/Kotlin/kotlinx-cli/pull/55))

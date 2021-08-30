@@ -14,26 +14,12 @@ plugins {
 
 infra {
     teamcity {
-        bintrayUser = "%env.BINTRAY_USER%"
-        bintrayToken = "%env.BINTRAY_API_KEY%"
+        libraryStagingRepoDescription = project.name
     }
     publishing {
         include(":kotlinx-cli")
-        bintray {
-            organization = "kotlin"
-            repository = "kotlinx"
-            library = "kotlinx.cli"
-            username = findProperty("bintrayUser") as String?
-            password = findProperty("bintrayApiKey") as String?
-        }
-
-        bintrayDev {
-            organization = "kotlin"
-            repository = "kotlin-dev"
-            library = "kotlinx.cli"
-            username = findProperty("bintrayUser") as String?
-            password = findProperty("bintrayApiKey") as String?
-        }
+        libraryRepoUrl = "https://github.com/Kotlin/kotlinx-cli"
+        sonatype {}
     }
 }
 
