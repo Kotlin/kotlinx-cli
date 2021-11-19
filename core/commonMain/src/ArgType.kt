@@ -112,4 +112,4 @@ abstract class ArgType<T : Any>(val hasParameter: kotlin.Boolean) {
     }
 }
 
-internal class ParsingException(message: String) : Exception(message)
+class ParsingException(message: String) : Exception(message)
