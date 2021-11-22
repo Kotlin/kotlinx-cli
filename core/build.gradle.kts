@@ -12,6 +12,7 @@ tasks.withType<KotlinCompile>().configureEach {
 kotlin {
     infra {
         target("macosX64")
+        target("macosArm64")
         target("linuxX64")
         target("mingwX64")
     }
