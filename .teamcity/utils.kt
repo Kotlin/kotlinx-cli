@@ -39,7 +39,7 @@ fun Platform.expectedArch(): String? = when (this) {
     Platform.MacosArm64 -> "aarch64"
 }
 
-fun Platform.buildTypeId(): String = buildTypeName().substringBefore(" ")
+fun Platform.buildTypeId(): String = buildTypeName().replace(" ", "_")
 fun Platform.teamcityAgentName(): String = buildTypeName()
 
 
