@@ -5,5 +5,5 @@ enum class DataSourceEnum {
     STAGING,
     PRODUCTION;
 
-    override fun toString(): String = name.toLowerCase()
+    override fun toString(): String = name.lowercase()
 }

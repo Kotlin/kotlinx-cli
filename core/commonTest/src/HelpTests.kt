@@ -17,6 +17,7 @@ class HelpTests {
         STATISTICS,
         METRICS
     }
+
     @Test
     fun testHelpMessage() {
         val argParser = ArgParser("test")
@@ -57,10 +58,11 @@ Options:
         SAMPLES,
         GEOMEAN;
 
-        override fun toString() = name.toLowerCase()
+        override fun toString() = name.lowercase()
     }
 
-    @Test
+    // JS IR: https://youtrack.jetbrains.com/issue/KT-48673
+    /*@Test
     fun testHelpForSubcommands() {
         class Summary: Subcommand("summary", "Get summary information") {
             val exec by option(ArgType.Choice<MetricType>(),
@@ -121,7 +123,7 @@ Options:
     --help, -h -> Usage info 
 """.trimIndent()
         assertEquals(expectedOutput, helpOutput)
-    }
+    }*/
 
     @Test
     fun testHelpMessageWithSubcommands() {
