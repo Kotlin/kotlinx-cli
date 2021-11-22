@@ -50,18 +50,16 @@ project {
             reuseBuilds = ReuseBuilds.NO
         }
     }
-    val deploys = platforms.map { deploy(it, deployVersion) }
+    val deploy = deploy(Platform.MacOSX64, deployVersion)
     val deployPublish = deployPublish(deployVersion).apply {
         dependsOnSnapshot(buildAll, onFailure = FailureAction.IGNORE)
         dependsOnSnapshot(BUILD_CREATE_STAGING_REPO_ABSOLUTE_ID) {
             reuseBuilds = ReuseBuilds.NO
         }
-        deploys.forEach {
-            dependsOnSnapshot(it)
-        }
+        dependsOnSnapshot(deploy)
     }
 
-    buildTypesOrder = listOf(buildAll, buildVersion, *builds.toTypedArray(), deployPublish, deployVersion, *deploys.toTypedArray())
+    buildTypesOrder = listOf(buildAll, buildVersion, *builds.toTypedArray(), deployPublish, deployVersion, deploy)
 
     additionalConfiguration()
 }
@@ -199,7 +197,7 @@ fun Project.deploy(platform: Platform, configureBuild: BuildType) = buildType("D
 
     steps {
         gradle {
-            name = "Deploy ${platform.buildTypeName()} Binaries"
+            name = "Deploy Binaries"
             jdkHome = "%env.$jdk%"
             jvmArgs = "-Xmx1g"
             gradleParams = "--info --stacktrace -P$versionSuffixParameter=%$versionSuffixParameter% -P$releaseVersionParameter=%$releaseVersionParameter% -PbintrayApiKey=%bintray-key% -PbintrayUser=%bintray-user%"
