@@ -41,10 +41,12 @@ fun Platform.expectedArch(): String? = when (this) {
 
 fun Platform.buildTypeId(): String = when(this) {
     Platform.MacosArm64 -> buildTypeName().replace(" ", "_")
-    else -> buildTypeName().substringBefore(" ")
+    else -> osName()
 }
 
-fun Platform.teamcityAgentName(): String = buildTypeName()
+fun Platform.osName(): String = buildTypeName().substringBefore(" ")
+
+fun Platform.teamcityAgentName(): String = osName()
 
 
 const val BUILD_CONFIGURE_VERSION_ID = "Build_Version"
