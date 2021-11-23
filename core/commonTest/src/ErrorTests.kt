@@ -73,4 +73,32 @@ class ErrorTests {
         }
         assertTrue("Option sources is expected to be one of [local, staging, production]. debug is provided." in exception.message!!)
     }
+
+    object KeyValue: ArgType<Pair<String, String>>(true) {
+        override val description: kotlin.String
+            get() {
+                return "{ Value should have format <key>=<value> }"
+            }
+
+        override fun convert(value: kotlin.String, name: kotlin.String) =
+            if (!value.contains('=')) {
+                throw ParsingException("Option $name should have value described with format <key>=<value>, but got $value")
+            } else {
+                val (key, parameterValue) = value.split('=', limit = 2)
+                key.trim() to parameterValue.trim()
+            }
+    }
+
+    @Test
+    fun testCustomOptionType() {
+        val argParser = ArgParser("testParser").avoidProcessExit()
+        val useShortForm by argParser.option(ArgType.Boolean, shortName = "s", description = "Show short version of report").default(false)
+        val option by argParser.option(KeyValue, shortName = "op", description = "Additional options").required()
+        val output by argParser.option(ArgType.String, shortName = "o", description = "Output file")
+
+        val exception = assertFailsWith<IllegalStateException> {
+            argParser.parse(arrayOf("-op", "-Xrender"))
+        }
+        assertTrue("Option option should have value described with format <key>=<value>, but got -Xrender" in exception.message!!)
+    }
 }
