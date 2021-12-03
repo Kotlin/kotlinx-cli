@@ -9,9 +9,14 @@ tasks.withType<KotlinCompile>().configureEach {
     kotlinOptions.allWarningsAsErrors = true
 }
 
+rootProject.plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootPlugin> {
+    rootProject.the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsRootExtension>().nodeVersion = "16.0.0"
+}
+
 kotlin {
     infra {
         target("macosX64")
+        target("macosArm64")
         target("linuxX64")
         target("mingwX64")
     }

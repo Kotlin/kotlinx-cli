@@ -17,20 +17,36 @@ val platforms = Platform.values()
 const val jdk = "JDK_18_x64"
 
 enum class Platform {
-    Windows, Linux, MacOS;
+    Windows, Linux, MacOSX64, MacosArm64;
 }
 
 fun Platform.nativeTaskPrefix(): String = when(this) {
     Platform.Windows -> "mingwX64"
     Platform.Linux -> "linuxX64"
-    Platform.MacOS -> "macosX64"
+    Platform.MacOSX64 -> "macosX64"
+    Platform.MacosArm64 -> "macosArm64"
+
 }
 fun Platform.buildTypeName(): String = when (this) {
     Platform.Windows, Platform.Linux -> name
-    Platform.MacOS -> "Mac OS X"
+    Platform.MacOSX64 -> "Mac OS X64"
+    Platform.MacosArm64 -> "Mac OS Arm64"
 }
-fun Platform.buildTypeId(): String = buildTypeName().substringBefore(" ")
-fun Platform.teamcityAgentName(): String = buildTypeName()
+
+fun Platform.expectedArch(): String? = when (this) {
+    Platform.Windows, Platform.Linux -> null
+    Platform.MacOSX64 -> "x86_64"
+    Platform.MacosArm64 -> "aarch64"
+}
+
+fun Platform.buildTypeId(): String = when(this) {
+    Platform.MacosArm64 -> buildTypeName().replace(" ", "_")
+    else -> osName()
+}
+
+fun Platform.osName(): String = buildTypeName().substringBefore(" ")
+
+fun Platform.teamcityAgentName(): String = osName()
 
 
 const val BUILD_CONFIGURE_VERSION_ID = "Build_Version"
@@ -65,11 +81,14 @@ fun Project.buildType(name: String, platform: Platform, configure: BuildType.() 
 
     requirements {
         contains("teamcity.agent.jvm.os.name", platform.teamcityAgentName())
+        platform.expectedArch()?.let {
+            contains("teamcity.agent.jvm.os.arch", it)
+        }
     }
 
     params {
         // This parameter is needed for macOS agent to be compatible
-        if (platform == Platform.MacOS) param("env.JDK_17", "")
+        if (platform == Platform.MacOSX64) param("env.JDK_17", "")
     }
 
     commonConfigure()
