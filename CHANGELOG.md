@@ -1,3 +1,8 @@
+## 0.3.4 ##
+
+* Support MacOSArm64 target ([GH-73](https://github.com/Kotlin/kotlinx-cli/pull/73))
+* Support error handling in custom ArgTypes ([GH-72](https://github.com/Kotlin/kotlinx-cli/pull/72))
+
 ## 0.3.3 ##
 
 * Fix to report correct exit code in case of non-parsable input ([GH-66](https://github.com/Kotlin/kotlinx-cli/pull/66))
