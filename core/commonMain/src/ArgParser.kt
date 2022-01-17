@@ -250,7 +250,7 @@ open class ArgParser(
         if (prefixStyle == OptionPrefixStyle.GNU && shortName != null)
             require(shortName.length == 1) {
                 """
-                GNU standart for options allow to use short form which consists of one character. 
+                GNU standard for options allow to use short form which consists of one character. 
                 For more information, please, see https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
                 """.trimIndent()
             }
