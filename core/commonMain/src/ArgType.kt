@@ -74,13 +74,18 @@ abstract class ArgType<T : Any>(val hasParameter: kotlin.Boolean) {
         /**
          * Helper for arguments that have limited set of possible values represented as enumeration constants.
          */
-        inline fun <reified T: Enum<T>> Choice(
-            noinline toVariant: (kotlin.String) -> T = {
-                enumValues<T>().find { e -> e.toString().equals(it, ignoreCase = true) } ?:
-                        throw IllegalArgumentException("No enum constant $it")
-            },
-            noinline toString: (T) -> kotlin.String = { it.toString().lowercase() }): Choice<T> {
-            return Choice(enumValues<T>().toList(), toVariant, toString)
+        inline fun <reified T : Enum<T>> Choice(
+            noinline toVariant: ((kotlin.String) -> T)? = null,
+            noinline toString: (T) -> kotlin.String = { it.toString().lowercase() }
+        ): Choice<T> {
+            return Choice(
+                enumValues<T>().toList(),
+                toVariant ?: {
+                    enumValues<T>().find { e -> toString(e).equals(it, ignoreCase = true) }
+                        ?: throw IllegalArgumentException("No enum constant $it")
+                },
+                toString
+            )
         }
     }
 
