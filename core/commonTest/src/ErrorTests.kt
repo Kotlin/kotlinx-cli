@@ -74,6 +74,17 @@ class ErrorTests {
         assertTrue("Option sources is expected to be one of [local, staging, production]. debug is provided." in exception.message!!)
     }
 
+    @Test
+    fun testWrongEnumChoiceWithCustomToString() {
+        val argParser = ArgParser("testParser").avoidProcessExit()
+        val sources by argParser.option(ArgType.Choice<DataSourceEnum> { it.name[0].toString().lowercase() },
+            "sources", "s", "Data sources")
+        val exception = assertFailsWith<IllegalStateException> {
+            argParser.parse(arrayOf("-s", "d"))
+        }
+        assertTrue("Option sources is expected to be one of [l, s, p]. d is provided." in exception.message!!)
+    }
+
     object KeyValue: ArgType<Pair<String, String>>(true) {
         override val description: kotlin.String
             get() {

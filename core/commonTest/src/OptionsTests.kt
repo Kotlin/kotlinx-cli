@@ -143,4 +143,17 @@ class OptionsTests {
         assertEquals(ArgParser.ValueOrigin.REDEFINED, rendersOption.valueOrigin)
         assertEquals(ArgParser.ValueOrigin.REDEFINED, sourcesOption.valueOrigin)
     }
+
+    @Test
+    fun testEnumChoiceWithCustomToString() {
+        val argParser = ArgParser("testParser")
+        val source by argParser.option(
+            ArgType.Choice<DataSourceEnum> {
+                it.name[0].toString().lowercase()
+            },
+            "sources", "s", "Data sources"
+        )
+        argParser.parse(arrayOf("-s", "S"))
+        assertEquals(DataSourceEnum.STAGING, source)
+    }
 }
