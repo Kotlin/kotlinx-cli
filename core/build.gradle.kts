@@ -76,8 +76,8 @@ kotlin {
         kotlin.setSrcDirs(listOf("$name/src"))
         resources.setSrcDirs(listOf("$name/resources"))
         languageSettings.apply {
-            useExperimentalAnnotation("kotlin.Experimental")
-            useExperimentalAnnotation("kotlinx.cli.ExperimentalCli")
+            optIn("kotlin.Experimental")
+            optIn("kotlinx.cli.ExperimentalCli")
         }
     }
 }
