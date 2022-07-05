@@ -40,7 +40,7 @@ kotlin {
     sourceSets {
         commonMain {
              dependencies {
-                 implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.4")
+                 implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.5")
              }
         }
     }
@@ -71,7 +71,7 @@ In Kotlin projects, add the following dependency to the `dependencies` element o
 <dependency>
     <groupId>org.jetbrains.kotlinx</groupId>
     <artifactId>kotlinx-cli-jvm</artifactId>
-    <version>0.3.4</version>
+    <version>0.3.5</version>
 </dependency>
 ```
 ## Command line entities

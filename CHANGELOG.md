@@ -1,3 +1,9 @@
+## 0.3.5 ##
+
+* Fix typo in GNU option message ([GH-75](https://github.com/Kotlin/kotlinx-cli/pull/75))
+* Fix Choice's default toVariant ([GH-77](https://github.com/Kotlin/kotlinx-cli/pull/77))
+* Enable HMPP with compatibility metadata variant ([GH-83](https://github.com/Kotlin/kotlinx-cli/pull/83))
+
 ## 0.3.4 ##
 
 * Support MacOSArm64 target ([GH-73](https://github.com/Kotlin/kotlinx-cli/pull/73))
