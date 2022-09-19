@@ -47,22 +47,6 @@ kotlin {
 }
 ```
 
-`kotlinx-cli` is also included in Kotlin/Native distribution as an endorsed library, so it's possible to use `kotlinx.cli`
-in Kotlin/Native projects without an explicit dependency on it. 
-
-If Gradle is used to build a project, turning on endorsed libraries in Kotlin/Native is possible with
-
-```kotlin
-kotlin {
-    linuxX64("linux") {
-        compilations["main"].enableEndorsedLibs = true
-    }
-}
-```
-
-> ### ❗ Important
-> If `kotlinx-cli` is added to a gradle project as an explicit dependency, endorsed libraries in Kotlin/Native must be turned off! 
-
 ### Maven
 
 In Kotlin projects, add the following dependency to the `dependencies` element of `pom.xml`:
