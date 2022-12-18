@@ -108,7 +108,7 @@ fun main(args: Array<String>) {
     val input by parser.option(ArgType.String, shortName = "i", description = "Input file").required()
     val output by parser.option(ArgType.String, shortName = "o", description = "Output file name")
     val format by parser.option(ArgType.Choice<Format>(), shortName = "f", 
-    	description = "Format for output file").default(Format.CSV).multiple()
+        description = "Format for output file").default(Format.CSV).multiple()
     val stringFormat by parser.option(ArgType.Choice(listOf("html", "csv", "pdf"), { it }), shortName = "sf", 
         description = "Format as string for output file").default("csv").multiple()
     val debug by parser.option(ArgType.Boolean, shortName = "d", description = "Turn on debug mode").default(false)
@@ -155,7 +155,7 @@ If application has rich command line interface and executes different actions wi
 import kotlinx.cli.*
 
 fun main(args: Array<String>) {
-	val parser = ArgParser("example")
+    val parser = ArgParser("example")
     val output by parser.option(ArgType.String, "output", "o", "Output file")
     class Summary: Subcommand("summary", "Calculate summary") {
         val invert by option(ArgType.Boolean, "invert", "i", "Invert results").default(false)
