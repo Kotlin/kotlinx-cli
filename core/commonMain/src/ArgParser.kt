@@ -9,6 +9,11 @@ import kotlin.reflect.KProperty
 
 internal expect fun exitProcess(status: Int): Nothing
 
+internal fun outputAndTerminate(message: String, exitCode: Int): Nothing {
+    println(message)
+    exitProcess(exitCode)
+}
+
 /**
  * Queue of arguments descriptors.
  * Arguments can have several values, so one descriptor can be returned several times.
@@ -176,11 +181,6 @@ open class ArgParser(
      */
     private var usedSubcommand: Subcommand? = null
 
-    internal var outputAndTerminate: (message: String, exitCode: Int) -> Nothing = { message, exitCode ->
-        println(message)
-        exitProcess(exitCode)
-    }
-
     /**
      * The way an option/argument has got its value.
      */
@@ -342,7 +342,6 @@ open class ArgParser(
             fullCommandName.forEachIndexed { index, namePart ->
                 it.fullCommandName.add(index, namePart)
             }
-            it.outputAndTerminate = outputAndTerminate
             subcommands[it.name] = it
         }
     }
@@ -352,8 +351,26 @@ open class ArgParser(
      *
      * @param message error message.
      */
-    private fun printError(message: String): Nothing {
+    protected open fun printError(message: String): Nothing {
         outputAndTerminate("$message\n${makeUsage()}", 127)
+    }
+
+    /**
+     * Output warning.
+     *
+     * @param message warning message.
+     */
+    protected open fun printWarning(message: String) {
+        println("WARNING $message")
+    }
+
+    /**
+     * Output non-error message and exit
+     *
+     * @param message status message
+     */
+    protected open fun printStatusAndExit(message: String) {
+        outputAndTerminate(message, 0)
     }
 
     /**
@@ -447,7 +464,7 @@ open class ArgParser(
             usedSubcommand?.let {
                 it.parse(listOf("${it.optionFullFormPrefix}${argValue.descriptor.fullName}"))
             }
-            outputAndTerminate(makeUsage(), 0)
+            printStatusAndExit(makeUsage())
         }
         saveAsOption(argValue, "true")
     }
@@ -693,13 +710,4 @@ open class ArgParser(
         }
         return result.toString()
     }
-}
-
-/**
- * Output warning.
- *
- * @param message warning message.
- */
-internal fun printWarning(message: String) {
-    println("WARNING $message")
 }

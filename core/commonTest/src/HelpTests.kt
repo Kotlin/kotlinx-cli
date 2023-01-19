@@ -20,7 +20,7 @@ class HelpTests {
 
     @Test
     fun testHelpMessage() {
-        val argParser = ArgParser("test")
+        val argParser = ArgParserWithoutExit("test")
         val mainReport by argParser.argument(ArgType.String, description = "Main report for analysis")
         val compareToReport by argParser.argument(ArgType.String, description = "Report to compare to").optional()
 
@@ -64,7 +64,7 @@ Options:
     // JS IR: https://youtrack.jetbrains.com/issue/KT-48673
     /*@Test
     fun testHelpForSubcommands() {
-        class Summary: Subcommand("summary", "Get summary information") {
+        class Summary: SubcommandWithoutExit("summary", "Get summary information") {
             val exec by option(ArgType.Choice<MetricType>(),
                     description = "Execution time way of calculation").default(MetricType.GEOMEAN)
             val execSamples by option(ArgType.String, "exec-samples",
@@ -98,7 +98,7 @@ Options:
         }
         val action = Summary()
         // Parse args.
-        val argParser = ArgParser("test")
+        val argParser = ArgParserWithoutExit("test")
         argParser.subcommands(action)
         argParser.parse(arrayOf("summary", "out.txt"))
         val helpOutput = action.makeUsage().trimIndent()
@@ -127,7 +127,7 @@ Options:
 
     @Test
     fun testHelpMessageWithSubcommands() {
-        abstract class CommonOptions(name: String, actionDescription: String): Subcommand(name, actionDescription) {
+        abstract class CommonOptions(name: String, actionDescription: String): SubcommandWithoutExit(name, actionDescription) {
             val numbers by argument(ArgType.Int, "numbers", description = "Numbers").vararg()
         }
         class Summary: CommonOptions("summary", "Calculate summary") {
@@ -150,7 +150,7 @@ Options:
 
         val summaryAction = Summary()
         val subtractionAction = Subtraction()
-        val argParser = ArgParser("testParser")
+        val argParser = ArgParserWithoutExit("testParser")
         argParser.subcommands(summaryAction, subtractionAction)
         argParser.parse(emptyArray())
         val helpOutput = argParser.makeUsage().trimIndent()
