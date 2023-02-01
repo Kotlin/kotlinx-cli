@@ -7,8 +7,6 @@
 
 package kotlinx.cli
 
-import kotlinx.cli.ArgParser
-import kotlinx.cli.ArgType
 import kotlin.test.*
 
 class ArgumentsTests {
@@ -25,7 +23,7 @@ class ArgumentsTests {
     }
 
     @Test
-    fun testArgumetsWithAnyNumberOfValues() {
+    fun testArgumentsWithAnyNumberOfValues() {
         val argParser = ArgParser("testParser")
         val output by argParser.argument(ArgType.String, "output", "Output file")
         val inputs by argParser.argument(ArgType.String, description = "Input files").vararg()
@@ -36,7 +34,7 @@ class ArgumentsTests {
     }
 
     @Test
-    fun testArgumetsWithSeveralValues() {
+    fun testArgumentsWithSeveralValues() {
         val argParser = ArgParser("testParser")
         val addendums by argParser.argument(ArgType.Int, "addendums", description = "Addendums").multiple(2)
         val output by argParser.argument(ArgType.String, "output", "Output file")
@@ -48,6 +46,22 @@ class ArgumentsTests {
         assertEquals(2, first)
         assertEquals(3, second)
     }
+    
+    @Test
+    fun testVarargArguments() {
+        val argParser = ArgParser("testParser")
+        val addendums by argParser.argument(ArgType.Int, "addendums", description = "Addendums").multiple(2)
+        val output by argParser.argument(ArgType.String, "output", "Output file")
+        val debugMode by argParser.option(ArgType.Boolean, "debug", "d", "Debug mode")
+        argParser.parse(main("2", "-d", "3", "out.txt"))
+        assertEquals("out.txt", output)
+        val (first, second) = addendums
+        assertEquals(2, addendums.size)
+        assertEquals(2, first)
+        assertEquals(3, second)
+    }
+    
+    private fun main(vararg args: String): Array<out String> = args 
 
     @Test
     fun testSkippingExtraArguments() {
