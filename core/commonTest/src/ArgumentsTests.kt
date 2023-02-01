@@ -49,6 +49,9 @@ class ArgumentsTests {
     
     @Test
     fun testVarargArguments() {
+        fun main(vararg args: String): Array<out String> = args 
+    
+
         val argParser = ArgParser("testParser")
         val addendums by argParser.argument(ArgType.Int, "addendums", description = "Addendums").multiple(2)
         val output by argParser.argument(ArgType.String, "output", "Output file")
@@ -60,8 +63,6 @@ class ArgumentsTests {
         assertEquals(2, first)
         assertEquals(3, second)
     }
-    
-    private fun main(vararg args: String): Array<out String> = args 
 
     @Test
     fun testSkippingExtraArguments() {
