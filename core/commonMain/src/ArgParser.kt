@@ -527,7 +527,7 @@ open class ArgParser(
      * Otherwise, prints the usage information and terminates the program execution.
      * @throws IllegalStateException in case of attempt of calling parsing several times.
      */
-    fun parse(args: Array<String>): ArgParserResult = parse(args.asList())
+    fun parse(args: Array<out String>): ArgParserResult = parse(args.asList())
 
     protected fun parse(args: List<String>): ArgParserResult {
         check(parsingState == null) { "Parsing of command line options can be called only once." }
