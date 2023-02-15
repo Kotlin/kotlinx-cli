@@ -103,7 +103,8 @@ open class ArgParser(
     var useDefaultHelpShortName: Boolean = true,
     var prefixStyle: OptionPrefixStyle = OptionPrefixStyle.LINUX,
     var skipExtraArguments: Boolean = false,
-    var strictSubcommandOptionsOrder: Boolean = false
+    var strictSubcommandOptionsOrder: Boolean = false,
+    var printHelpOnEmptyArgs: Boolean = false
 ) {
 
     /**
@@ -531,6 +532,10 @@ open class ArgParser(
 
     protected fun parse(args: List<String>): ArgParserResult {
         check(parsingState == null) { "Parsing of command line options can be called only once." }
+        
+        if (args.isEmpty() && printHelpOnEmptyArgs) {
+            outputAndTerminate(makeUsage(), 0)
+        }
 
         // Add help option.
         val helpDescriptor = if (useDefaultHelpShortName) OptionDescriptor<Boolean, Boolean>(
