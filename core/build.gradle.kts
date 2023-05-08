@@ -18,6 +18,7 @@ kotlin {
         target("macosX64")
         target("macosArm64")
         target("linuxX64")
+        target("linuxArm64")
         target("mingwX64")
     }
 

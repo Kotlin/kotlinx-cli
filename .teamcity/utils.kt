@@ -17,24 +17,29 @@ val platforms = Platform.values()
 const val jdk = "JDK_18"
 
 enum class Platform {
-    Windows, Linux, MacOSX64, MacosArm64;
+    Windows, LinuxX64, LinuxArm64, MacOSX64, MacosArm64;
 }
 
 fun Platform.nativeTaskPrefix(): String = when(this) {
     Platform.Windows -> "mingwX64"
-    Platform.Linux -> "linuxX64"
+    Platform.LinuxX64 -> "linuxX64"
+    Platform.LinuxArm64 -> "linuxArm64"
     Platform.MacOSX64 -> "macosX64"
     Platform.MacosArm64 -> "macosArm64"
 
 }
 fun Platform.buildTypeName(): String = when (this) {
-    Platform.Windows, Platform.Linux -> name
+    Platform.Windows -> name
+    Platform.LinuxX64 -> "Linux X64"
+    Platform.LinuxArm64 -> "Linux Arm64"
     Platform.MacOSX64 -> "Mac OS X64"
     Platform.MacosArm64 -> "Mac OS Arm64"
 }
 
 fun Platform.expectedArch(): String? = when (this) {
-    Platform.Windows, Platform.Linux -> null
+    Platform.Windows -> null
+    Platform.LinuxX64 -> "x64"
+    Platform.LinuxArm64 -> "aarch64"
     Platform.MacOSX64 -> "x86_64"
     Platform.MacosArm64 -> "aarch64"
 }
