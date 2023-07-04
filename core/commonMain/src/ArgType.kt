@@ -33,7 +33,8 @@ abstract class ArgType<T : Any>(val hasParameter: kotlin.Boolean) {
             get() = ""
 
         override fun convert(value: kotlin.String, name: kotlin.String): kotlin.Boolean =
-            value != "false"
+            runCatching { value.lowercase().toBooleanStrict() }
+                .getOrElse { throw ParsingException("Option $name is expected to be boolean value. $value is provided.") }
     }
 
     /**
