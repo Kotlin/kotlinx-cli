@@ -21,7 +21,7 @@ kotlin {
         target("mingwX64")
     }
 
-    js {
+    js(IR) {
         moduleName = "${rootProject.name}-${project.name}"
         nodejs {
         }
@@ -76,8 +76,7 @@ kotlin {
         kotlin.setSrcDirs(listOf("$name/src"))
         resources.setSrcDirs(listOf("$name/resources"))
         languageSettings.apply {
-            useExperimentalAnnotation("kotlin.Experimental")
-            useExperimentalAnnotation("kotlinx.cli.ExperimentalCli")
+            optIn("kotlinx.cli.ExperimentalCli")
         }
     }
 }
