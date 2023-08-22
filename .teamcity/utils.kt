@@ -87,8 +87,9 @@ fun Project.buildType(name: String, platform: Platform, configure: BuildType.() 
     }
 
     params {
-        // This parameter is needed for macOS agent to be compatible
+        // These parameters are needed for macOS agents to be compatible
         if (platform == Platform.MacOSX64) param("env.JDK_17", "")
+        if (platform == Platform.MacosArm64) param("env.JDK_16", "")
     }
 
     commonConfigure()
