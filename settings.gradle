@@ -11,8 +11,6 @@ pluginManagement {
     }
 }
 
-enableFeaturePreview('GRADLE_METADATA')
-
 rootProject.name = 'Kotlinx-Cli-Library'
 
 include ':core'
