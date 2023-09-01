@@ -1,3 +1,8 @@
+## 0.3.6 ##
+
+* Support using `parse(args)` in `fun main(vararg args: String)` ([GH-95](https://github.com/Kotlin/kotlinx-cli/pull/95))
+* Update Kotlin to 1.9.10 ([GH-102](https://github.com/Kotlin/kotlinx-cli/pull/102))
+
 ## 0.3.5 ##
 
 * Fix typo in GNU option message ([GH-75](https://github.com/Kotlin/kotlinx-cli/pull/75))
