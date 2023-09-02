@@ -531,7 +531,7 @@ open class ArgParser(
 
     protected fun parse(args: List<String>): ArgParserResult {
         check(parsingState == null) { "Parsing of command line options can be called only once." }
-
+        
         // Add help option.
         val helpDescriptor = if (useDefaultHelpShortName) OptionDescriptor<Boolean, Boolean>(
             optionFullFormPrefix,
